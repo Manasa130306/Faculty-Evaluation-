@@ -179,8 +179,8 @@ export default function LockMonthPage() {
             Review and manage lock status for all 12 academic months of {selectedYear}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0">
-          <Table>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow className="bg-slate-100/80">
                 <TableHead>Month</TableHead>

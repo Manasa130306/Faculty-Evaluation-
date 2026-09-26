@@ -306,7 +306,7 @@ export default function MonthRecordsPage() {
       {/* Top Header & Excel Export */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Month Records & Evaluation Review</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Month Records & Evaluation Review</h1>
           <p className="text-xs text-slate-500 mt-1">
             Review monthly faculty self-appraisals, assign Head 1 marks, review & modify H2–H8 evidence with audit history
           </p>
@@ -326,7 +326,7 @@ export default function MonthRecordsPage() {
       {/* Filter Slicers */}
       <Card className="border-slate-200 shadow-xs">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Search Input */}
             <div className="relative sm:col-span-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -413,14 +413,14 @@ export default function MonthRecordsPage() {
 
       {/* Records Table */}
       <Card className="border-slate-200 shadow-xs overflow-hidden">
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           {isLoading ? (
             <div className="py-16 text-center">
               <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
               <p className="text-xs text-slate-500 font-medium">Loading evaluation records...</p>
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow className="bg-slate-100 text-slate-800">
                   <TableHead className="w-28 font-bold">Faculty ID</TableHead>

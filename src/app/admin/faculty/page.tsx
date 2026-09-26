@@ -129,9 +129,9 @@ export default function FacultyManagementPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
         <div>
-          <div className="flex items-center gap-2">
-            <Users className="w-6 h-6 text-blue-700" />
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Faculty Management</h1>
+          <div className="flex items-center gap-2 mb-2 sm:mb-0">
+            <Users className="w-5 sm:w-6 h-5 sm:h-6 text-blue-700 shrink-0" />
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Faculty Management</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Official NSRIET Faculty Master sourced from the Service Register ({activeCount} Active, {inactiveCount} Removed/Inactive)
@@ -139,7 +139,7 @@ export default function FacultyManagementPage() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 overflow-x-auto w-full sm:w-auto">
           <button
             onClick={() => setActiveTab('service_register')}
             className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
@@ -231,14 +231,14 @@ export default function FacultyManagementPage() {
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-x-auto">
               {isLoading ? (
                 <div className="py-16 text-center">
                   <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                   <p className="text-xs text-slate-500 font-medium">Loading faculty records...</p>
                 </div>
               ) : (
-                <Table>
+                <Table className="min-w-[800px]">
                   <TableHeader>
                     <TableRow className="bg-slate-100 text-slate-800">
                       <TableHead className="w-32 font-bold">Faculty ID</TableHead>
@@ -384,8 +384,8 @@ export default function FacultyManagementPage() {
           </div>
 
           <Card className="border-slate-200 shadow-xs overflow-hidden">
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[800px]">
                 <TableHeader>
                   <TableRow className="bg-slate-100 text-slate-800">
                     <TableHead className="w-10">#</TableHead>

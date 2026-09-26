@@ -424,11 +424,11 @@ export default function FacultyEvaluationPortal() {
   const isCurrentHeadAdminModified = evaluation?.head_marks?.[currentStep]?.is_admin_modified;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 pb-12 items-start">
+    <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 pb-8 sm:pb-12 items-start">
       {/* ========================================================================= */}
       {/* LEFT SIDEBAR NAVIGATION                                                   */}
       {/* ========================================================================= */}
-      <aside className="w-full lg:w-64 shrink-0 space-y-4">
+      <aside className="w-full lg:w-64 shrink-0 space-y-3 sm:space-y-4">
         {/* Faculty Profile Card */}
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center gap-3">
@@ -632,10 +632,10 @@ export default function FacultyEvaluationPortal() {
         {activeView === 'dashboard' && (
           <div className="space-y-6">
             {/* Top Welcome Header */}
-            <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Faculty Dashboard</h1>
-                <p className="text-xs text-slate-500 mt-0.5">
+            <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Faculty Dashboard</h1>
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
                   Welcome, {user?.name}. Manage your monthly self-appraisals and track your annual SAR performance.
                 </p>
               </div>
@@ -656,7 +656,7 @@ export default function FacultyEvaluationPortal() {
             </div>
 
             {/* Quick Access Action Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Card 1: Current Evaluation */}
               <Card className="border-slate-200 shadow-xs hover:border-blue-300 transition-colors">
                 <CardHeader className="pb-3">
@@ -761,7 +761,7 @@ export default function FacultyEvaluationPortal() {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto">
                 <div className="divide-y divide-slate-100">
                   {PERFORMANCE_HEADS.map((head) => {
                     const metric = monthFramework.heads[head.number];
@@ -777,7 +777,7 @@ export default function FacultyEvaluationPortal() {
                           setActiveView('evaluation');
                           setCurrentStep(head.number);
                         }}
-                        className={`p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer ${
+                        className={`p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 sm:justify-between hover:bg-slate-50/70 transition-colors cursor-pointer ${
                           isHeadAdminModified ? 'bg-amber-50/30' : ''
                         }`}
                       >
@@ -808,7 +808,7 @@ export default function FacultyEvaluationPortal() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end sm:justify-start">
                           {hasFile && (
                             <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
                               <FileText className="w-3 h-3" /> Proof Attached
@@ -840,7 +840,7 @@ export default function FacultyEvaluationPortal() {
         {activeView === 'evaluation' && (
           <div className="space-y-6">
             {/* Step Navigation Pills */}
-            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-1.5 overflow-x-auto">
+            <div className="bg-white p-2 sm:p-3 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-1 sm:gap-1.5 overflow-x-auto -mx-1 sm:mx-0 scrollbar-thin">
               {PERFORMANCE_HEADS.map((head) => {
                 const isCurrent = currentStep === head.number;
                 const metric = monthFramework.heads[head.number];
@@ -855,7 +855,7 @@ export default function FacultyEvaluationPortal() {
                       await saveCurrentHead(currentStep);
                       setCurrentStep(head.number);
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 shrink-0 ${
                       isCurrent
                         ? 'bg-blue-700 text-white shadow-xs'
                         : isMod
@@ -879,7 +879,7 @@ export default function FacultyEvaluationPortal() {
                   await saveCurrentHead(currentStep);
                   setCurrentStep(9);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 shrink-0 ${
                   currentStep === 9
                     ? 'bg-blue-700 text-white shadow-xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -894,7 +894,7 @@ export default function FacultyEvaluationPortal() {
             {currentStep >= 1 && currentStep <= 8 && activeMetric && (
               <Card className="border-slate-200 shadow-xs bg-white">
                 <CardHeader className="bg-slate-50/70 border-b border-slate-200 pb-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
@@ -923,7 +923,7 @@ export default function FacultyEvaluationPortal() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-6 space-y-6">
+                <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   {/* ADMIN MODIFICATION NOTIFICATION BANNER (Part 6) */}
                   {isCurrentHeadAdminModified && evaluation?.head_marks?.[currentStep] && (
                     <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 space-y-2">
@@ -1002,7 +1002,7 @@ export default function FacultyEvaluationPortal() {
                             value={headFormState[currentStep]?.marks || ''}
                             onChange={(e) => handleMarksChange(currentStep, e.target.value)}
                             placeholder={`Enter score out of ${activeMetric.maxMarks}`}
-                            className="h-11 text-base font-mono font-bold w-full sm:w-56"
+                            className="h-10 sm:h-11 text-sm sm:text-base font-mono font-bold w-full sm:w-56"
                           />
                           <span className="text-xs text-slate-400 font-semibold">
                             / {activeMetric.maxMarks} Marks Max
@@ -1017,8 +1017,8 @@ export default function FacultyEvaluationPortal() {
 
                       {/* Reference Document Upload Section with 1 MB Limit */}
                       <div className="space-y-2 pt-4 border-t border-slate-200">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-slate-800 block">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+                          <label className="text-xs font-bold text-slate-800">
                             Supporting Reference Document (Evidence):
                           </label>
                           <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
@@ -1129,7 +1129,7 @@ export default function FacultyEvaluationPortal() {
                   )}
                 </CardContent>
 
-                <CardFooter className="bg-slate-50/70 border-t border-slate-200 p-4 flex items-center justify-between">
+                <CardFooter className="bg-slate-50/70 border-t border-slate-200 p-3 sm:p-4 flex items-center justify-between gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -1160,7 +1160,7 @@ export default function FacultyEvaluationPortal() {
             {currentStep === 9 && (
               <Card className="border-slate-200 shadow-xs bg-white">
                 <CardHeader className="bg-slate-50/70 border-b border-slate-200 pb-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div>
                       <CardTitle className="text-xl text-slate-900">
                         Self-Appraisal Summary Preview ({selectedMonth} {selectedYear})
@@ -1176,8 +1176,8 @@ export default function FacultyEvaluationPortal() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-0">
-                  <Table className="w-full text-xs">
+                <CardContent className="p-0 overflow-x-auto">
+                  <Table className="w-full text-xs min-w-[640px]">
                     <TableHeader>
                       <TableRow className="bg-slate-100/70">
                         <TableHead className="w-16 font-bold text-slate-700">Head</TableHead>
@@ -1259,7 +1259,7 @@ export default function FacultyEvaluationPortal() {
                   </Table>
                 </CardContent>
 
-                <CardFooter className="bg-slate-50/70 border-t border-slate-200 p-4 flex items-center justify-between">
+                <CardFooter className="bg-slate-50/70 border-t border-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0">
                   <Button
                     variant="outline"
                     size="sm"
@@ -1293,10 +1293,10 @@ export default function FacultyEvaluationPortal() {
         {activeView === 'final_report' && (
           <div className="space-y-6">
             {/* Top Header */}
-            <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Faculty Final Report</h1>
-                <p className="text-xs text-slate-500 mt-0.5">
+            <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Faculty Final Report</h1>
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
                   12-Month Self-Appraisal &amp; SAR Consolidated Summary (Academic Year {selectedYear} &ndash; {selectedYear + 1})
                 </p>
               </div>
@@ -1324,7 +1324,7 @@ export default function FacultyEvaluationPortal() {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <Card className="border-slate-200 shadow-xs bg-white">
                 <CardContent className="p-4 flex items-center gap-3">
                   <div className="p-3 bg-blue-50 text-blue-700 rounded-xl border border-blue-100">
@@ -1380,7 +1380,7 @@ export default function FacultyEvaluationPortal() {
               </CardHeader>
 
               <CardContent className="p-4 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
                   {CALENDAR_MONTHS.map((m) => {
                     const fid = user?.faculty_id?.toUpperCase() || '';
                     const evalItem =

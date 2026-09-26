@@ -115,19 +115,19 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-700 flex items-center justify-center text-white shadow-sm">
-              <GraduationCap className="w-6 h-6" />
+        <div className="max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-700 flex items-center justify-center text-white shadow-sm shrink-0">
+              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg text-slate-900 tracking-tight">NSRIET</span>
-                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold border border-blue-200">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-bold text-base sm:text-lg text-slate-900 tracking-tight">NSRIET</span>
+                <span className="text-[10px] sm:text-xs bg-blue-50 text-blue-700 px-1.5 sm:px-2 py-0.5 rounded-full font-semibold border border-blue-200 truncate">
                   Evaluation Portal
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">Faculty Performance Management System</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium hidden sm:block truncate">Faculty Performance Management System</p>
             </div>
           </div>
 
@@ -138,7 +138,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="flex items-center gap-1.5 sm:gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl transition-all cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
                   <div className="w-8 h-8 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold text-xs shadow-xs">
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -235,6 +235,7 @@ export function Navbar() {
               </Link>
             </div>
           )}
+        </div>
         </div>
       </header>
 

@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
       {/* Top Header & Period Slicer & Drive OAuth Action */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Executive Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Admin Executive Dashboard</h1>
           <p className="text-xs text-slate-500 mt-1">
             Overall institution evaluation summary and department-level submission tracking
           </p>
@@ -237,7 +237,7 @@ export default function AdminDashboardPage() {
       ) : (
         <>
           {/* Summary Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
             {/* Card 1: Total Faculty */}
             <Card className="border-slate-200 shadow-xs hover:border-slate-300 transition-colors">
               <CardHeader className="flex flex-row items-center justify-between pb-2 border-none">
@@ -323,8 +323,8 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[500px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Department</TableHead>
