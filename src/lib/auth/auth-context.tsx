@@ -142,7 +142,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Local cache fallback
         const stored = localStorage.getItem(AUTH_STORAGE_KEY);
         if (stored && mounted) {
-          setUser(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          setUser(parsed);
+          if (parsed?.role === 'admin' && typeof document !== 'undefined') {
+            document.cookie = `nsriet_admin_session=${encodeURIComponent(
+              JSON.stringify({
+                id: parsed.id,
+                faculty_id: parsed.faculty_id,
+                role: 'admin',
+                timestamp: Date.now(),
+              })
+            )}; path=/; max-age=604800; SameSite=Lax`;
+          }
         }
       } catch (e) {
         console.error('Failed to load session:', e);
@@ -342,6 +353,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('[ADMIN AUTH] Admin role:', adminUser.role);
     console.log('[ADMIN AUTH] Authorization successful');
 
+    // Set secure admin session cookie for Next.js server Route Handlers
+    if (typeof document !== 'undefined') {
+      document.cookie = `nsriet_admin_session=${encodeURIComponent(
+        JSON.stringify({
+          id: adminUser.id,
+          faculty_id: cleanId,
+          role: 'admin',
+          timestamp: Date.now(),
+        })
+      )}; path=/; max-age=604800; SameSite=Lax`;
+    }
+
     setUser(adminUser);
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
     return { success: true };
@@ -468,6 +491,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.warn('Supabase sign out error:', err);
     } finally {
+      if (typeof document !== 'undefined') {
+        document.cookie = 'nsriet_admin_session=; path=/; max-age=0; SameSite=Lax';
+      }
       setUser(null);
       localStorage.removeItem(AUTH_STORAGE_KEY);
     }

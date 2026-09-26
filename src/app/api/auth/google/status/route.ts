@@ -1,24 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdminSession } from '@/lib/auth/admin-session';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const adminSession = await verifyAdminSession(request);
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile || profile.role !== 'admin') {
+    if (!adminSession.isValid) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -27,6 +15,7 @@ export async function GET(request: NextRequest) {
 
     let hasDbRefreshToken = false;
     try {
+      const supabase = await createClient();
       const { data } = await supabase
         .from('system_settings')
         .select('updated_at')
@@ -44,10 +33,18 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       connected: isOAuthConfigured || isServiceAccountConfigured,
-      authMethod: isOAuthConfigured ? 'OAuth 2.0 (User Authorization)' : isServiceAccountConfigured ? 'Service Account' : 'None',
+      authMethod: isOAuthConfigured
+        ? 'OAuth 2.0 (User Authorization)'
+        : isServiceAccountConfigured
+        ? 'Service Account'
+        : 'None',
       hasOAuthClientId,
       hasRefreshToken: hasEnvRefreshToken || hasDbRefreshToken,
-      tokenSource: hasEnvRefreshToken ? 'Environment Variable' : hasDbRefreshToken ? 'Database (OAuth Consent)' : 'None',
+      tokenSource: hasEnvRefreshToken
+        ? 'Environment Variable'
+        : hasDbRefreshToken
+        ? 'Database (OAuth Consent)'
+        : 'None',
     });
   } catch (error: any) {
     return NextResponse.json(

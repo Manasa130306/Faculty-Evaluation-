@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
+  const state = searchParams.get('state');
   const error = searchParams.get('error');
 
   const baseUrl = new URL(request.url).origin;
@@ -19,6 +20,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       new URL('/admin/dashboard?drive_auth=error&reason=no_code_provided', baseUrl)
     );
+  }
+
+  // Verify OAuth CSRF state if present
+  const storedState = request.cookies.get('oauth_state')?.value;
+  if (state && storedState && state !== storedState) {
+    console.warn('[OAUTH] CSRF state mismatch detected in callback');
   }
 
   try {
@@ -49,14 +56,22 @@ export async function GET(request: NextRequest) {
           description: 'Google Drive OAuth 2.0 Refresh Token for IQAC Drive Storage',
           updated_at: new Date().toISOString(),
         });
-      } catch (dbErr) {
-        // Continue even if database table is not yet migrated, token is acknowledged
+      } catch {
+        // Continue even if database table is not yet migrated
       }
     }
 
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       new URL('/admin/dashboard?drive_auth=success', baseUrl)
     );
+
+    // Clear the oauth_state cookie
+    response.cookies.set('oauth_state', '', {
+      path: '/',
+      maxAge: 0,
+    });
+
+    return response;
   } catch (err: any) {
     return NextResponse.redirect(
       new URL(

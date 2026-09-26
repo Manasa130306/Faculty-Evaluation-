@@ -1,31 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { createClient } from '@/lib/supabase/server';
+import { verifyAdminSession } from '@/lib/auth/admin-session';
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. Verify Admin access before initiating OAuth
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // 1. Verify Admin session (Supabase Auth server session OR verified Admin session cookie)
+    const adminSession = await verifyAdminSession(request);
 
-    if (!user) {
+    if (!adminSession.isValid) {
       return NextResponse.redirect(new URL('/admin-login?error=unauthorized', request.url));
-    }
-
-    // Check if user is an admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Only administrators can connect Google Drive.' },
-        { status: 403 }
-      );
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -46,15 +29,29 @@ export async function GET(request: NextRequest) {
 
     const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 
-    // Generate OAuth Authorization URL with offline access and force consent to guarantee refresh_token
+    // 2. Generate secure state parameter for CSRF protection
+    const state = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+
+    // 3. Generate OAuth Authorization URL
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       prompt: 'consent',
       scope: ['https://www.googleapis.com/auth/drive'],
+      state,
       include_granted_scopes: true,
     });
 
-    return NextResponse.redirect(authUrl);
+    // 4. Redirect with secure state cookie
+    const response = NextResponse.redirect(authUrl);
+    response.cookies.set('oauth_state', state, {
+      path: '/',
+      maxAge: 600, // 10 minutes
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Error initiating Google OAuth flow:', error?.message || error);
     return NextResponse.json(
