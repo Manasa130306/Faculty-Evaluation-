@@ -418,7 +418,7 @@ export default function FacultyManagementPage() {
                               ? 'success'
                               : audit.match_status === 'ambiguous'
                               ? 'warning'
-                              : 'secondary'
+                              : 'danger'
                           }
                           className="text-[10px]"
                         >
@@ -426,7 +426,7 @@ export default function FacultyManagementPage() {
                             ? 'Verified'
                             : audit.match_status === 'ambiguous'
                             ? 'Ambiguous'
-                            : 'Unmatched'}
+                            : 'Needs Admin Confirmation'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">

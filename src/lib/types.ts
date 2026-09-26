@@ -52,6 +52,10 @@ export interface EvaluationHeadMark {
   evaluation_id?: string;
   head_number: number;
   marks: number | null;
+  original_faculty_marks?: number | null;
+  is_admin_modified?: boolean;
+  admin_modified_at?: string | null;
+  admin_modified_by?: string | null;
   file_path?: string;
   file_name?: string;
   file_size?: number;
@@ -105,6 +109,7 @@ export interface FacultySummaryRow {
   head_7: number | null;
   head_8: number | null;
   total_marks: number;
+  has_admin_modifications?: boolean;
 }
 
 export interface SarAuditRecord {
@@ -114,4 +119,22 @@ export interface SarAuditRecord {
   matched_faculty_id: string | null;
   match_status: 'verified' | 'ambiguous' | 'unmatched';
   notes?: string;
+}
+
+export interface EvaluationMarkChange {
+  id?: string;
+  evaluation_id: string;
+  faculty_id: string;
+  faculty_name?: string;
+  year: number;
+  month: string;
+  head_number: number;
+  original_marks: number | null;
+  revised_marks: number | null;
+  changed_by_admin_id: string;
+  changed_by_admin_name?: string | null;
+  reference_document_name?: string | null;
+  reference_document_path?: string | null;
+  changed_at?: string;
+  created_at?: string;
 }

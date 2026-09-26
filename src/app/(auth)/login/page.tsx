@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -48,22 +49,34 @@ export default function FacultyLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md">
-        {/* Top College Header */}
+    <div className="relative min-h-screen flex flex-col justify-center items-center p-4">
+      {/* Background Campus Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/campus_background.jpg"
+          alt="NSRIET Campus"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-slate-900/65 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* College Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex w-12 h-12 rounded-xl bg-blue-700 text-white items-center justify-center shadow-md mb-2">
+          <div className="inline-flex w-12 h-12 rounded-xl bg-blue-700 text-white items-center justify-center shadow-lg mb-2">
             <GraduationCap className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">NSRIET Faculty Portal</h1>
-          <p className="text-xs text-slate-500 font-medium">Monthly Evaluation & Appraisal Management (1000-Mark Framework)</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">NSRIET Faculty Portal</h1>
+          <p className="text-xs text-slate-200 font-medium mt-0.5">Monthly Evaluation & Appraisal Management System</p>
         </div>
 
-        <Card className="shadow-lg border-slate-200">
+        <Card className="shadow-2xl border-slate-200/80 bg-white/95 backdrop-blur-md">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl">Faculty Sign In</CardTitle>
-            <CardDescription>
-              Enter your permanent Faculty EMP. ID (from Service Register) and password to access your monthly self-appraisal.
+            <CardTitle className="text-xl text-slate-900">Faculty Sign In</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
+              Enter your permanent Faculty ID (from Service Register) and password to access your monthly self-appraisal.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -81,7 +94,7 @@ export default function FacultyLoginPage() {
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <Input
                     type="text"
-                    placeholder="e.g. 23TS050009 or 25TS040053"
+                    placeholder="Enter Faculty ID"
                     value={facultyId}
                     onChange={(e) => setFacultyId(e.target.value)}
                     className="pl-9 font-mono uppercase"
@@ -89,7 +102,6 @@ export default function FacultyLoginPage() {
                     required
                   />
                 </div>
-                <p className="text-[11px] text-slate-400">Unique permanent Faculty ID issued in the Service Register</p>
               </div>
 
               <div className="space-y-1.5">
@@ -98,21 +110,16 @@ export default function FacultyLoginPage() {
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <Input
                     type="password"
-                    placeholder="••••••••••••"
+                    placeholder="Enter Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-9"
                     required
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 bg-blue-50/70 p-2 rounded-md border border-blue-100">
-                  <strong className="text-blue-900">Default Password Format:</strong>{' '}
-                  <code className="text-blue-700 font-mono">FacultyID@NSRIET</code> (e.g.{' '}
-                  <code className="text-blue-700 font-mono">23TS050009@NSRIET</code> or <code className="text-blue-700 font-mono">password123</code>)
-                </p>
               </div>
 
-              <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+              <Button type="submit" className="w-full mt-2 cursor-pointer font-bold" disabled={isSubmitting}>
                 {isSubmitting ? 'Signing In...' : 'Log In to Evaluation Portal'}
                 {!isSubmitting && <ArrowRight className="w-4 h-4 ml-1.5" />}
               </Button>

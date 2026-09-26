@@ -7,6 +7,7 @@ import {
   FacultySummaryRow,
   FacultyRecord,
   SarAuditRecord,
+  EvaluationMarkChange,
 } from '../types';
 import { SERVICE_REGISTER_FACULTY, SAR_AUDIT_LOGS } from '../constants/facultyData';
 import { HISTORICAL_EVALUATIONS } from '../constants/historicalData';
@@ -18,6 +19,7 @@ const STORAGE_KEYS = {
   EVALUATIONS: 'nsriet_evaluations_v3',
   FILES: 'nsriet_reference_files_cache_v3',
   SAR_AUDIT: 'nsriet_sar_audit_v3',
+  MARK_CHANGES: 'nsriet_evaluation_mark_changes_v3',
 };
 
 export const STORAGE_BUCKET_NAME = 'faculty-reference-documents';
@@ -96,7 +98,7 @@ function initDefaultStorage(): void {
   if (!localStorage.getItem(STORAGE_KEYS.EVALUATIONS)) {
     const evalMap: Record<string, MonthlyEvaluation> = {};
     HISTORICAL_EVALUATIONS.forEach((h) => {
-      const key = `${h.faculty_id.toUpperCase()}_${h.year}_${h.month}`;
+      const key = `${h.faculty_id.toUpperCase()}_${h.year}_${h.month.toLowerCase()}`;
       evalMap[key] = {
         id: `hist_${h.faculty_id}_${h.year}_${h.month}`,
         faculty_id: h.faculty_id,
@@ -207,7 +209,7 @@ export const DataService = {
           .from('faculty')
           .select('*, profiles:user_id(role)')
           .eq('faculty_id', cleanId)
-          .single();
+          .maybeSingle();
 
         if (!error && data) {
           return {
@@ -441,7 +443,7 @@ export const DataService = {
         department: profileData.department.trim(),
         designation: profileData.designation.trim(),
         doj: new Date().toISOString().split('T')[0],
-        dor: 'N/A',
+        dor: null,
         is_demo: isDemo,
       });
     }
@@ -450,10 +452,6 @@ export const DataService = {
     return newProfile;
   },
 
-  /**
-   * Update Faculty Profile without changing Faculty ID or duplicating records.
-   * Historical evaluations (Faculty ID + Year + Month) remain untouched and intact.
-   */
   async updateFacultyProfile(
     facultyId: string,
     updates: { name: string; designation: string; department: string }
@@ -530,9 +528,6 @@ export const DataService = {
     return updatedProfile;
   },
 
-  /**
-   * Fetch all monthly evaluations for a single faculty member for an entire year.
-   */
   async getFacultyAnnualEvaluations(
     facultyId: string,
     year: number
@@ -559,6 +554,10 @@ export const DataService = {
                   evaluation_id: hm.evaluation_id,
                   head_number: hm.head_number,
                   marks: hm.marks,
+                  original_faculty_marks: hm.original_faculty_marks ?? null,
+                  is_admin_modified: hm.is_admin_modified ?? false,
+                  admin_modified_at: hm.admin_modified_at ?? null,
+                  admin_modified_by: hm.admin_modified_by ?? null,
                   file_path: hm.reference_document_path || '',
                   file_name: hm.reference_document_name || '',
                   file_size: hm.reference_document_size || 0,
@@ -727,7 +726,7 @@ export const DataService = {
           .eq('faculty_id', cleanId)
           .eq('year', year)
           .ilike('month', month)
-          .single();
+          .maybeSingle();
 
         if (!error && data) {
           const headMarksRecord: Record<number, EvaluationHeadMark> = {};
@@ -739,6 +738,10 @@ export const DataService = {
                 evaluation_id: hm.evaluation_id,
                 head_number: hm.head_number,
                 marks: hm.marks,
+                original_faculty_marks: hm.original_faculty_marks ?? null,
+                is_admin_modified: hm.is_admin_modified ?? false,
+                admin_modified_at: hm.admin_modified_at ?? null,
+                admin_modified_by: hm.admin_modified_by ?? null,
                 file_path: fPath,
                 file_name: hm.reference_document_name || '',
                 file_size: hm.reference_document_size || 0,
@@ -910,6 +913,24 @@ export const DataService = {
     evaluation.total_marks = total;
     evaluation.updated_at = new Date().toISOString();
 
+    // 1. Persist directly to Supabase via Server Action
+    try {
+      const { saveHeadMarkAction } = await import('@/app/actions/evaluation');
+      await saveHeadMarkAction(
+        cleanId,
+        year,
+        month,
+        headNumber,
+        marks,
+        documentMetadata,
+        referenceInfo,
+        isAdminUpdate
+      );
+    } catch (actionErr) {
+      console.warn('saveHeadMarkAction fallback:', actionErr);
+    }
+
+    // 2. Direct client fallback if connected
     if (isSupabaseConfigured()) {
       try {
         const { data: evalData } = await supabase
@@ -959,21 +980,148 @@ export const DataService = {
 
     // UPDATE MONTHLY EXCEL REPORT IN DRIVE (Reference documents are retained in Drive for 2 months)
     try {
-       await this.triggerMonthlyExcelUpdate(year, month);
+      await this.triggerMonthlyExcelUpdate(year, month);
     } catch (err) {
-       console.warn('Failed to update Excel report in Drive:', err);
+      console.warn('Failed to update Excel report in Drive:', err);
     }
 
     return evaluation;
+  },
+
+  async adminModifyHeadMark(params: {
+    facultyId: string;
+    facultyName?: string;
+    year: number;
+    month: string;
+    headNumber: number;
+    revisedMarks: number;
+    adminId: string;
+    adminName?: string;
+  }): Promise<MonthlyEvaluation> {
+    initDefaultStorage();
+    const { facultyId, facultyName, year, month, headNumber, revisedMarks, adminId, adminName } = params;
+    const cleanId = facultyId.toUpperCase();
+
+    const evaluation = await this.getEvaluation(cleanId, year, month);
+    const headMarks = evaluation.head_marks || {};
+    const existing = headMarks[headNumber] || {};
+
+    const originalFacultyMarks =
+      existing.original_faculty_marks !== null && existing.original_faculty_marks !== undefined
+        ? existing.original_faculty_marks
+        : existing.marks ?? null;
+
+    headMarks[headNumber] = {
+      ...existing,
+      head_number: headNumber,
+      marks: Number(revisedMarks),
+      original_faculty_marks: originalFacultyMarks,
+      is_admin_modified: true,
+      admin_modified_at: new Date().toISOString(),
+      admin_modified_by: adminId,
+      updated_at: new Date().toISOString(),
+    };
+
+    let total = 0;
+    for (let i = 1; i <= 8; i++) {
+      if (headMarks[i] && headMarks[i].marks !== null && headMarks[i].marks !== undefined) {
+        total += Number(headMarks[i].marks) || 0;
+      }
+    }
+
+    evaluation.head_marks = headMarks;
+    evaluation.total_marks = total;
+    evaluation.updated_at = new Date().toISOString();
+
+    // 1. Server Action with audit logging
+    try {
+      const { adminModifyHeadMarkAction } = await import('@/app/actions/evaluation');
+      await adminModifyHeadMarkAction({
+        facultyId: cleanId,
+        facultyName,
+        year,
+        month,
+        headNumber,
+        revisedMarks,
+        adminId,
+        adminName,
+      });
+    } catch (err) {
+      console.warn('adminModifyHeadMarkAction error:', err);
+    }
+
+    // 2. Save audit entry locally
+    const auditLogs = getLocalData<EvaluationMarkChange[]>(STORAGE_KEYS.MARK_CHANGES, []);
+    auditLogs.unshift({
+      id: `change_${Date.now()}`,
+      evaluation_id: evaluation.id,
+      faculty_id: cleanId,
+      faculty_name: facultyName,
+      year,
+      month,
+      head_number: headNumber,
+      original_marks: originalFacultyMarks,
+      revised_marks: revisedMarks,
+      changed_by_admin_id: adminId,
+      changed_by_admin_name: adminName || 'IQAC Administrator',
+      reference_document_name: existing.file_name || null,
+      reference_document_path: existing.file_path || null,
+      changed_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    });
+    setLocalData(STORAGE_KEYS.MARK_CHANGES, auditLogs);
+
+    // 3. Update evaluation in Local Storage
+    const evals = getLocalData<Record<string, MonthlyEvaluation>>(
+      STORAGE_KEYS.EVALUATIONS,
+      {}
+    );
+    const key = this.getEvaluationKey(cleanId, year, month);
+    evals[key] = evaluation;
+    setLocalData(STORAGE_KEYS.EVALUATIONS, evals);
+
+    // 4. Update monthly Excel
+    try {
+      await this.triggerMonthlyExcelUpdate(year, month);
+    } catch (err) {
+      console.warn('Failed to update Excel report in Drive:', err);
+    }
+
+    return evaluation;
+  },
+
+  async getEvaluationMarkChanges(
+    facultyId?: string,
+    year?: number,
+    month?: string
+  ): Promise<EvaluationMarkChange[]> {
+    initDefaultStorage();
+    try {
+      const { getEvaluationMarkChangesAction } = await import('@/app/actions/evaluation');
+      const serverChanges = await getEvaluationMarkChangesAction(facultyId, year, month);
+      if (serverChanges && serverChanges.length > 0) {
+        return serverChanges;
+      }
+    } catch (err) {
+      console.warn('getEvaluationMarkChangesAction error:', err);
+    }
+
+    const localChanges = getLocalData<EvaluationMarkChange[]>(STORAGE_KEYS.MARK_CHANGES, []);
+    return localChanges.filter((c) => {
+      if (facultyId && c.faculty_id.toUpperCase() !== facultyId.trim().toUpperCase()) return false;
+      if (year && c.year !== Number(year)) return false;
+      if (month && c.month.toLowerCase() !== month.trim().toLowerCase()) return false;
+      return true;
+    });
   },
 
   async triggerMonthlyExcelUpdate(year: number, monthName: string) {
     const activeFaculty = await this.getActiveFacultyForMonth(year, monthName);
     const evalsMap: Record<string, MonthlyEvaluation> = {};
     for (const f of activeFaculty) {
-        if (f.faculty_id) {
-          evalsMap[this.getEvaluationKey(f.faculty_id, year, monthName)] = await this.getEvaluation(f.faculty_id, year, monthName);
-        }
+      if (f.faculty_id) {
+        evalsMap[this.getEvaluationKey(f.faculty_id, year, monthName)] = await this.getEvaluation(f.faculty_id, year, monthName);
+      }
     }
     const { updateMonthlyExcelAction } = await import('@/app/actions/drive');
     await updateMonthlyExcelAction(activeFaculty, year, monthName, evalsMap);
@@ -995,6 +1143,15 @@ export const DataService = {
     evaluation.status = 'submitted';
     evaluation.submitted_at = new Date().toISOString();
 
+    // 1. Persist directly to Supabase via Server Action
+    try {
+      const { submitEvaluationAction } = await import('@/app/actions/evaluation');
+      await submitEvaluationAction(cleanId, year, month);
+    } catch (actionErr) {
+      console.warn('submitEvaluationAction fallback:', actionErr);
+    }
+
+    // 2. Direct client fallback
     if (isSupabaseConfigured()) {
       try {
         await supabase
@@ -1019,6 +1176,13 @@ export const DataService = {
     const key = this.getEvaluationKey(cleanId, year, month);
     evals[key] = evaluation;
     setLocalData(STORAGE_KEYS.EVALUATIONS, evals);
+
+    // Trigger Excel Update
+    try {
+      await this.triggerMonthlyExcelUpdate(year, month);
+    } catch (err) {
+      console.warn('Failed to update Excel report in Drive:', err);
+    }
 
     return evaluation;
   },
@@ -1098,6 +1262,10 @@ export const DataService = {
                   evaluation_id: hm.evaluation_id,
                   head_number: hm.head_number,
                   marks: hm.marks,
+                  original_faculty_marks: hm.original_faculty_marks ?? null,
+                  is_admin_modified: hm.is_admin_modified ?? false,
+                  admin_modified_at: hm.admin_modified_at ?? null,
+                  admin_modified_by: hm.admin_modified_by ?? null,
                   file_path: hm.reference_document_path || '',
                   file_name: hm.reference_document_name || '',
                   file_size: hm.reference_document_size || 0,
@@ -1157,6 +1325,11 @@ export const DataService = {
         }
       }
 
+      let hasAdminMods = false;
+      if (evalData?.head_marks) {
+        hasAdminMods = Object.values(evalData.head_marks).some((h) => h.is_admin_modified);
+      }
+
       const row: FacultySummaryRow = {
         faculty_id: f.faculty_id,
         name: f.name,
@@ -1177,6 +1350,7 @@ export const DataService = {
         head_7: evalData?.head_marks?.[7]?.marks ?? null,
         head_8: evalData?.head_marks?.[8]?.marks ?? null,
         total_marks: evalData?.total_marks ?? 0,
+        has_admin_modifications: hasAdminMods,
       };
 
       rows.push(row);
@@ -1270,6 +1444,10 @@ export const DataService = {
                   evaluation_id: hm.evaluation_id,
                   head_number: hm.head_number,
                   marks: hm.marks,
+                  original_faculty_marks: hm.original_faculty_marks ?? null,
+                  is_admin_modified: hm.is_admin_modified ?? false,
+                  admin_modified_at: hm.admin_modified_at ?? null,
+                  admin_modified_by: hm.admin_modified_by ?? null,
                   file_path: hm.reference_document_path || '',
                   file_name: hm.reference_document_name || '',
                   file_size: hm.reference_document_size || 0,
@@ -1392,6 +1570,10 @@ export const DataService = {
                   evaluation_id: hm.evaluation_id,
                   head_number: hm.head_number,
                   marks: hm.marks,
+                  original_faculty_marks: hm.original_faculty_marks ?? null,
+                  is_admin_modified: hm.is_admin_modified ?? false,
+                  admin_modified_at: hm.admin_modified_at ?? null,
+                  admin_modified_by: hm.admin_modified_by ?? null,
                   file_path: hm.reference_document_path || '',
                   file_name: hm.reference_document_name || '',
                   file_size: hm.reference_document_size || 0,
@@ -1421,4 +1603,3 @@ export const DataService = {
     return evals;
   },
 };
-

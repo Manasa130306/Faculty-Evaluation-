@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -10,8 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { ShieldCheck, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const [adminId, setAdminId] = useState('NSRE01');
-  const [password, setPassword] = useState('NSRE@ADMIN');
+  const [adminId, setAdminId] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,14 +32,11 @@ export default function AdminLoginPage() {
     try {
       const res = await loginAdmin(adminId, password);
       if (res.success) {
-        console.log('[ADMIN AUTH] Redirecting to /admin/dashboard');
         router.push('/admin/dashboard');
       } else {
-        console.warn('[ADMIN AUTH ERROR]', res.error);
         setError(res.error || 'Invalid administrator credentials.');
       }
     } catch (err: any) {
-      console.error('[ADMIN AUTH ERROR]', err);
       setError(err.message || 'An error occurred during authentication.');
     } finally {
       setIsSubmitting(false);
@@ -46,20 +44,32 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex flex-col justify-center items-center p-4">
+      {/* Background Campus Image with Overlay (Same as Landing and Faculty Login) */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/campus_background.jpg"
+          alt="NSRIET Campus"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-6">
-          <div className="inline-flex w-12 h-12 rounded-xl bg-blue-600 text-white items-center justify-center shadow-lg mb-2">
+          <div className="inline-flex w-12 h-12 rounded-xl bg-blue-700 text-white items-center justify-center shadow-lg mb-2">
             <ShieldCheck className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">NSRIET Administration</h1>
-          <p className="text-xs text-slate-400 font-medium">Restricted Executive & Leadership Portal</p>
+          <p className="text-xs text-slate-200 font-medium">Restricted Executive & Leadership Portal</p>
         </div>
 
-        <Card className="shadow-2xl border-slate-800 bg-white">
+        <Card className="shadow-2xl border-slate-200/80 bg-white/95 backdrop-blur-md">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl">Executive Sign In</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl text-slate-900">Executive Sign In</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Authorized access for College Principal, Deans, and Evaluation Administrators.
             </CardDescription>
           </CardHeader>
@@ -78,10 +88,11 @@ export default function AdminLoginPage() {
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <Input
                     type="text"
-                    placeholder="NSRE01"
+                    placeholder="Enter Admin ID"
                     value={adminId}
                     onChange={(e) => setAdminId(e.target.value)}
                     className="pl-9 font-mono"
+                    autoFocus
                     required
                   />
                 </div>
@@ -93,7 +104,7 @@ export default function AdminLoginPage() {
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <Input
                     type="password"
-                    placeholder="••••••••••••"
+                    placeholder="Enter Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-9"
@@ -102,14 +113,7 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600">
-                <span className="font-semibold text-slate-800">Main Administrator Credentials:</span>
-                <br />
-                ID: <code className="font-mono text-blue-700 font-bold">NSRE01</code> • Password:{' '}
-                <code className="font-mono text-blue-700 font-bold">NSRE@ADMIN</code>
-              </div>
-
-              <Button type="submit" variant="secondary" className="w-full mt-2 cursor-pointer font-bold" disabled={isSubmitting}>
+              <Button type="submit" className="w-full mt-2 cursor-pointer font-bold bg-blue-800 hover:bg-blue-900 text-white" disabled={isSubmitting}>
                 {isSubmitting ? 'Authenticating...' : 'Sign In as Administrator'}
                 {!isSubmitting && <ArrowRight className="w-4 h-4 ml-1.5" />}
               </Button>

@@ -12,7 +12,7 @@ import {
   DEPARTMENTS,
   getMonthFramework,
 } from '@/lib/constants/heads';
-import { MonthlyEvaluation, FacultySummaryRow } from '@/lib/types';
+import { MonthlyEvaluation, FacultySummaryRow, EvaluationMarkChange } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,10 @@ import {
   AlertCircle,
   FileText,
   ExternalLink,
+  Edit3,
+  AlertTriangle,
+  History,
+  X,
 } from 'lucide-react';
 
 export default function MonthRecordsPage() {
@@ -65,6 +69,46 @@ export default function MonthRecordsPage() {
   const [head1SuccessMsg, setHead1SuccessMsg] = useState<string | null>(null);
   const [head1ErrorMsg, setHead1ErrorMsg] = useState<string | null>(null);
   const [isHead1SuccessModalOpen, setIsHead1SuccessModalOpen] = useState<boolean>(false);
+
+  // Admin H2-H8 Modification Modal State
+  const [editHeadModal, setEditHeadModal] = useState<{
+    isOpen: boolean;
+    headNumber: number;
+    headName: string;
+    maxMarks: number;
+    originalMarks: number | null;
+    currentMarks: number | null;
+    docName: string;
+    docUrl: string;
+    docType?: string;
+    docSize?: number;
+    revisedMarks: string;
+    error: string | null;
+    isSaving: boolean;
+  }>({
+    isOpen: false,
+    headNumber: 2,
+    headName: '',
+    maxMarks: 10,
+    originalMarks: null,
+    currentMarks: null,
+    docName: '',
+    docUrl: '',
+    revisedMarks: '',
+    error: null,
+    isSaving: false,
+  });
+
+  // Audit History Modal State
+  const [auditModal, setAuditModal] = useState<{
+    isOpen: boolean;
+    records: EvaluationMarkChange[];
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    records: [],
+    isLoading: false,
+  });
 
   // Month lock status for the viewed month
   const [isMonthLocked, setIsMonthLocked] = useState<boolean>(false);
@@ -167,6 +211,94 @@ export default function MonthRecordsPage() {
     }
   };
 
+  // Open H2-H8 Modification Modal
+  const handleOpenEditHead = (headNo: number) => {
+    if (!viewingFaculty || !viewingEval) return;
+    const fw = getMonthFramework(selectedMonth);
+    const metric = fw.heads[headNo];
+    const headData = viewingEval.head_marks?.[headNo];
+    const maxMarks = metric?.maxMarks ?? 0;
+
+    const originalMarks =
+      headData?.original_faculty_marks !== null && headData?.original_faculty_marks !== undefined
+        ? headData.original_faculty_marks
+        : headData?.marks ?? null;
+
+    const currentMarks = headData?.marks ?? null;
+
+    const resolvedUrl = headData?.file_url || (headData?.file_path ? (headData.file_path.startsWith('http') || headData.file_path.startsWith('data:') ? headData.file_path : `/api/drive/file/${headData.file_path}`) : '');
+
+    setEditHeadModal({
+      isOpen: true,
+      headNumber: headNo,
+      headName: metric?.name || `Head ${headNo}`,
+      maxMarks,
+      originalMarks,
+      currentMarks,
+      docName: headData?.file_name || '',
+      docUrl: resolvedUrl,
+      docType: headData?.file_type,
+      docSize: headData?.file_size,
+      revisedMarks: currentMarks !== null ? String(currentMarks) : '',
+      error: null,
+      isSaving: false,
+    });
+  };
+
+  // Save H2-H8 Modification by Admin
+  const handleSaveHeadModification = async () => {
+    if (!viewingFaculty) return;
+    const numVal = parseFloat(editHeadModal.revisedMarks);
+    if (isNaN(numVal) || numVal < 0 || numVal > editHeadModal.maxMarks) {
+      setEditHeadModal((prev) => ({
+        ...prev,
+        error: `Revised marks must be between 0 and ${editHeadModal.maxMarks}.`,
+      }));
+      return;
+    }
+
+    setEditHeadModal((prev) => ({ ...prev, isSaving: true, error: null }));
+    try {
+      const updatedEval = await DataService.adminModifyHeadMark({
+        facultyId: viewingFaculty.faculty_id,
+        facultyName: viewingFaculty.name,
+        year: selectedYear,
+        month: selectedMonth,
+        headNumber: editHeadModal.headNumber,
+        revisedMarks: numVal,
+        adminId: user?.faculty_id || 'ADMIN01',
+        adminName: user?.name || 'Administrator (IQAC)',
+      });
+
+      setViewingEval(updatedEval);
+      setEditHeadModal((prev) => ({ ...prev, isOpen: false, isSaving: false }));
+      await loadSummaries();
+    } catch (err: any) {
+      setEditHeadModal((prev) => ({
+        ...prev,
+        isSaving: false,
+        error: err.message || 'Failed to save modification.',
+      }));
+    }
+  };
+
+  // Open Audit History Modal
+  const handleOpenAuditHistory = async () => {
+    if (!viewingFaculty) return;
+    setAuditModal({ isOpen: true, records: [], isLoading: true });
+    try {
+      const logs = await DataService.getEvaluationMarkChanges(
+        viewingFaculty.faculty_id,
+        selectedYear,
+        selectedMonth
+      );
+      setAuditModal({ isOpen: true, records: logs, isLoading: false });
+    } catch (err) {
+      console.error('Failed to load audit history:', err);
+      setAuditModal({ isOpen: true, records: [], isLoading: false });
+    }
+  };
+
   const monthFramework = getMonthFramework(selectedMonth);
 
   return (
@@ -174,9 +306,9 @@ export default function MonthRecordsPage() {
       {/* Top Header & Excel Export */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Month Records & Head 1 Entry</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Month Records & Evaluation Review</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Review monthly faculty self-appraisals, assign Head 1 IQAC marks, and export official reports
+            Review monthly faculty self-appraisals, assign Head 1 marks, review & modify H2–H8 evidence with audit history
           </p>
         </div>
 
@@ -304,105 +436,70 @@ export default function MonthRecordsPage() {
                   <TableHead className="text-center w-14">H6 ({monthFramework.heads[6]?.maxMarks ?? 0})</TableHead>
                   <TableHead className="text-center w-14">H7 ({monthFramework.heads[7]?.maxMarks ?? 0})</TableHead>
                   <TableHead className="text-center w-14">H8 ({monthFramework.heads[8]?.maxMarks ?? 0})</TableHead>
-                  <TableHead className="text-center w-20 bg-slate-200 font-black text-slate-900">
-                    Total
-                  </TableHead>
-                  <TableHead className="text-center w-24">Status</TableHead>
-                  <TableHead className="text-right w-24">Action</TableHead>
+                  <TableHead className="text-center w-20 font-bold">Total</TableHead>
+                  <TableHead className="text-center w-28 font-bold">Status</TableHead>
+                  <TableHead className="text-center w-20 font-bold">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {facultyRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={14} className="text-center py-10 text-slate-500">
-                      No faculty records match the selected filters.
+                    <TableCell colSpan={14} className="text-center py-12 text-slate-400 text-xs">
+                      No faculty records found matching the criteria.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  facultyRows.map((row) => (
-                    <TableRow key={row.faculty_id} className="hover:bg-blue-50/30">
-                      <TableCell className="font-mono font-bold text-blue-700 text-xs">
-                        {row.faculty_id}
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-bold text-slate-900 text-xs">{row.name}</div>
-                        <div className="text-[11px] text-slate-400">{row.designation}</div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-[10px] font-bold">
-                          {row.department}
-                        </Badge>
-                      </TableCell>
-
-                      {/* Head 1 */}
-                      <TableCell className="text-center font-bold font-mono bg-blue-50/40 text-blue-900 border-l border-r border-blue-200 text-xs">
-                        {row.head_1 !== null ? Number(row.head_1).toFixed(1) : (
-                          <span className="text-amber-600 text-[11px] font-sans">Pending</span>
-                        )}
-                      </TableCell>
-
-                      {/* Heads 2-8 */}
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[2]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_2 !== null ? Number(row.head_2).toFixed(1) : '—'}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[3]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_3 !== null ? Number(row.head_3).toFixed(1) : '—'}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[4]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_4 !== null ? Number(row.head_4).toFixed(1) : '—'}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[5]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_5 !== null ? Number(row.head_5).toFixed(1) : '—'}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[6]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_6 !== null ? Number(row.head_6).toFixed(1) : '—'}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[7]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_7 !== null ? Number(row.head_7).toFixed(1) : '—'}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {monthFramework.heads[8]?.maxMarks === 0 ? <span className="text-slate-300">0</span> : row.head_8 !== null ? Number(row.head_8).toFixed(1) : '—'}
-                      </TableCell>
-
-                      {/* Total */}
-                      <TableCell className="text-center font-black font-mono text-xs bg-slate-100 text-slate-900">
-                        {Number(row.total_marks).toFixed(1)} / {monthFramework.totalMarks}
-                      </TableCell>
-
-                      {/* Status */}
-                      <TableCell className="text-center">
-                        <Badge
-                          variant={
-                            row.status === 'submitted'
-                              ? 'success'
-                              : row.status === 'draft'
-                              ? 'warning'
-                              : 'outline'
-                          }
-                          className="text-[10px]"
-                        >
-                          {row.status === 'submitted'
-                            ? 'Submitted'
-                            : row.status === 'draft'
-                            ? 'Draft'
-                            : 'Not Started'}
-                        </Badge>
-                      </TableCell>
-
-                      {/* Action */}
-                      <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleOpenFacultyEvaluation(row)}
-                          className="text-xs h-7 px-2 font-semibold cursor-pointer"
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-1" />
-                          Open
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  facultyRows.map((row) => {
+                    const isSubmitted = row.status === 'submitted';
+                    return (
+                      <TableRow key={row.faculty_id} className="hover:bg-slate-50/70 transition-colors">
+                        <TableCell className="font-mono text-xs font-bold text-slate-700">
+                          {row.faculty_id}
+                        </TableCell>
+                        <TableCell className="font-bold text-xs text-slate-900">
+                          <div className="flex items-center gap-1.5">
+                            <span>{row.name}</span>
+                            {row.has_admin_modifications && (
+                              <Badge variant="warning" className="text-[9px] px-1 py-0">Admin Mod</Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-slate-600">
+                          <Badge variant="outline" className="text-[10px] font-semibold">{row.department}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center font-mono text-xs font-bold bg-blue-50/40 text-blue-900 border-l border-r border-blue-100">
+                          {row.head_1 !== null ? row.head_1 : '-'}
+                        </TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_2 !== null ? row.head_2 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_3 !== null ? row.head_3 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_4 !== null ? row.head_4 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_5 !== null ? row.head_5 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_6 !== null ? row.head_6 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_7 !== null ? row.head_7 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs text-slate-600">{row.head_8 !== null ? row.head_8 : '-'}</TableCell>
+                        <TableCell className="text-center font-mono text-xs font-bold text-slate-900">
+                          {row.total_marks.toFixed(1)}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {isSubmitted ? (
+                            <Badge variant="success" className="text-[10px]">Submitted</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-[10px]">Pending</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleOpenFacultyEvaluation(row)}
+                            className="h-7 text-xs font-bold cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5 mr-1" /> View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -410,42 +507,53 @@ export default function MonthRecordsPage() {
         </CardContent>
       </Card>
 
-      {/* COMPLETE MONTHLY EVALUATION MODAL (HEADS 1 TO 8) */}
+      {/* FACULTY COMPLETE EVALUATION & ADMIN REVIEW MODAL */}
       <Dialog
-        isOpen={Boolean(viewingFaculty)}
+        isOpen={!!viewingFaculty}
         onClose={() => setViewingFaculty(null)}
-        title={viewingFaculty ? `${viewingFaculty.name} (${viewingFaculty.faculty_id})` : 'Evaluation'}
-        description={`Complete Performance Appraisal & Evidence for ${selectedMonth} ${selectedYear}`}
+        title={
+          viewingFaculty
+            ? `${viewingFaculty.name} (${viewingFaculty.faculty_id}) — ${selectedMonth} ${selectedYear}`
+            : 'Faculty Evaluation'
+        }
+        className="max-w-4xl"
       >
-        {isLoadingEval || !viewingEval || !viewingFaculty ? (
+        {isLoadingEval ? (
           <div className="py-12 text-center">
             <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-xs text-slate-500 font-medium">Loading full monthly evaluation...</p>
+            <p className="text-xs text-slate-500">Loading appraisal details...</p>
           </div>
         ) : (
-          <div className="space-y-6 max-h-[75vh] overflow-y-auto pr-1">
-            {/* Faculty Meta Banner */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="space-y-6 pt-2">
+            {/* Header info strip */}
+            <div className="bg-slate-100 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div>
-                <span className="text-slate-400 block">Department:</span>
-                <strong className="text-slate-800">{viewingFaculty.department}</strong>
+                <span className="text-slate-500 block">Department & Designation:</span>
+                <strong className="text-slate-900">{viewingFaculty?.department} &bull; {viewingFaculty?.designation}</strong>
               </div>
               <div>
-                <span className="text-slate-400 block">Designation:</span>
-                <strong className="text-slate-800">{viewingFaculty.designation}</strong>
+                <span className="text-slate-500 block">Status:</span>
+                <span className="font-bold text-slate-900 uppercase">
+                  {viewingEval?.status === 'submitted' ? (
+                    <span className="text-emerald-700">Submitted ({viewingEval.submitted_at ? new Date(viewingEval.submitted_at).toLocaleDateString() : 'Yes'})</span>
+                  ) : (
+                    <span className="text-amber-700">Draft / Pending</span>
+                  )}
+                </span>
               </div>
               <div>
-                <span className="text-slate-400 block">Status:</span>
-                <Badge variant={viewingEval.status === 'submitted' ? 'success' : 'warning'} className="text-[10px]">
-                  {viewingEval.status === 'submitted' ? 'Submitted' : 'Draft'}
-                </Badge>
+                <span className="text-slate-500 block">Monthly Total Score:</span>
+                <strong className="text-blue-900 font-mono text-sm">{viewingEval?.total_marks.toFixed(1) || '0.0'} / {monthFramework.totalMarks}</strong>
               </div>
-              <div>
-                <span className="text-slate-400 block">Total Score:</span>
-                <strong className="text-blue-700 text-sm font-mono font-black">
-                  {Number(viewingEval.total_marks).toFixed(1)} / {monthFramework.totalMarks}
-                </strong>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenAuditHistory}
+                className="text-xs font-bold gap-1 cursor-pointer"
+              >
+                <History className="w-3.5 h-3.5 text-slate-600" />
+                Audit History
+              </Button>
             </div>
 
             {/* HEAD 1: ADMIN ENTRY SECTION */}
@@ -508,16 +616,17 @@ export default function MonthRecordsPage() {
               </CardContent>
             </Card>
 
-            {/* HEADS 2 TO 8: FACULTY SUBMISSION DETAILS & EVIDENCE */}
+            {/* HEADS 2 TO 8: FACULTY SUBMISSION DETAILS & ADMIN EDIT */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Heads 2 to 8 Self-Appraisals & Reference Documents
+                Heads 2 to 8 Self-Appraisals, Reference Documents & Admin Review
               </h3>
 
               {[2, 3, 4, 5, 6, 7, 8].map((headNo) => {
                 const metric = monthFramework.heads[headNo];
                 const headData = viewingEval?.head_marks?.[headNo];
                 const hasWeightage = (metric?.maxMarks ?? 0) > 0;
+                const isAdminModified = headData?.is_admin_modified;
 
                 return (
                   <div
@@ -525,12 +634,14 @@ export default function MonthRecordsPage() {
                     className={`p-3.5 rounded-xl border transition-all ${
                       !hasWeightage
                         ? 'bg-slate-50/50 border-slate-200 opacity-60'
+                        : isAdminModified
+                        ? 'bg-amber-50/40 border-amber-300'
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-mono font-bold text-xs text-slate-400">
                             #{headNo}
                           </span>
@@ -540,14 +651,25 @@ export default function MonthRecordsPage() {
                               Not Applicable this Month (0 Marks)
                             </Badge>
                           )}
+                          {isAdminModified && (
+                            <Badge variant="warning" className="text-[10px]">
+                              Modified by Admin
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-[11px] text-slate-500 mt-1">{metric?.description}</p>
+                        {isAdminModified && (
+                          <p className="text-[10px] text-amber-800 font-semibold mt-1">
+                            Original Faculty Submission: {headData.original_faculty_marks ?? '0'} marks
+                            {headData.admin_modified_at && ` • Modified on ${new Date(headData.admin_modified_at).toLocaleDateString()}`}
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
                         {hasWeightage ? (
                           <div className="text-right">
-                            <span className="text-[10px] text-slate-400 block">Assigned Score</span>
+                            <span className="text-[10px] text-slate-400 block">Final Score</span>
                             <span className="font-mono font-bold text-sm text-slate-900">
                               {headData?.marks !== null && headData?.marks !== undefined
                                 ? Number(headData.marks).toFixed(1)
@@ -557,6 +679,17 @@ export default function MonthRecordsPage() {
                           </div>
                         ) : (
                           <span className="text-xs font-mono font-bold text-slate-400">0 / 0</span>
+                        )}
+
+                        {hasWeightage && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenEditHead(headNo)}
+                            className="h-8 text-xs font-bold border-blue-300 text-blue-700 hover:bg-blue-50 cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5 mr-1" /> Edit Marks
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -609,31 +742,6 @@ export default function MonthRecordsPage() {
                               <span className="text-[11px] text-slate-400">Attached</span>
                             )}
                           </div>
-
-                          {/* Aspect-Ratio Preserved Image Display */}
-                          {resolvedUrl &&
-                            (headData?.file_type?.startsWith('image/') ||
-                              /\.(jpg|jpeg|png|webp|gif)$/i.test(docName)) && (
-                            <div
-                              onClick={() =>
-                                setViewerDoc({
-                                  url: resolvedUrl,
-                                  name: docName,
-                                  type: headData?.file_type || undefined,
-                                  size: headData?.file_size || undefined,
-                                  title: `Head ${headNo}: ${metric?.name}`,
-                                })
-                              }
-                              className="p-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center max-h-56 overflow-hidden cursor-pointer hover:border-blue-300 transition-colors"
-                              title="Click to view full preview"
-                            >
-                              <img
-                                src={resolvedUrl}
-                                alt={docName}
-                                className="max-h-52 max-w-full object-contain rounded"
-                              />
-                            </div>
-                          )}
                         </div>
                       );
                     })()}
@@ -643,6 +751,162 @@ export default function MonthRecordsPage() {
             </div>
           </div>
         )}
+      </Dialog>
+
+      {/* ADMIN H2-H8 EDIT MARKS MODAL */}
+      <Dialog
+        isOpen={editHeadModal.isOpen}
+        onClose={() => setEditHeadModal((prev) => ({ ...prev, isOpen: false }))}
+        title={`Edit Marks: Head ${editHeadModal.headNumber} — ${editHeadModal.headName}`}
+        className="max-w-lg"
+      >
+        <div className="space-y-4 pt-2">
+          {/* Faculty & Month Details */}
+          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5">
+            <div className="flex justify-between">
+              <span className="text-slate-500">Faculty Name:</span>
+              <strong className="text-slate-900">{viewingFaculty?.name}</strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Faculty ID:</span>
+              <strong className="font-mono text-slate-900">{viewingFaculty?.faculty_id}</strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Department:</span>
+              <span className="font-semibold text-slate-800">{viewingFaculty?.department}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Period:</span>
+              <span className="font-semibold text-slate-800">{selectedMonth} {selectedYear}</span>
+            </div>
+            <div className="flex justify-between pt-1 border-t border-slate-200">
+              <span className="text-slate-500">Faculty-Submitted Marks:</span>
+              <strong className="font-mono text-slate-900">{editHeadModal.originalMarks !== null ? editHeadModal.originalMarks : 'N/A'} / {editHeadModal.maxMarks}</strong>
+            </div>
+            {editHeadModal.docName && (
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-slate-500">Reference Document:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (editHeadModal.docUrl) {
+                      setViewerDoc({
+                        url: editHeadModal.docUrl,
+                        name: editHeadModal.docName,
+                        type: editHeadModal.docType,
+                        size: editHeadModal.docSize,
+                        title: `Head ${editHeadModal.headNumber} Evidence`,
+                      });
+                    }
+                  }}
+                  className="text-blue-700 hover:underline font-semibold flex items-center gap-1 text-[11px]"
+                >
+                  <Eye className="w-3 h-3" /> {editHeadModal.docName}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Revised Marks Input */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-800">
+              Revised Marks (0 to {editHeadModal.maxMarks}):
+            </label>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              max={editHeadModal.maxMarks}
+              value={editHeadModal.revisedMarks}
+              onChange={(e) =>
+                setEditHeadModal((prev) => ({ ...prev, revisedMarks: e.target.value, error: null }))
+              }
+              placeholder={`Enter marks (max ${editHeadModal.maxMarks})`}
+              className="h-10 text-sm font-mono font-bold"
+              autoFocus
+            />
+          </div>
+
+          {/* Clear Admin Warning Banner */}
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2.5 text-xs text-amber-900 font-medium">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <strong className="block font-bold text-amber-950">Administrative Modification Notice:</strong>
+              This will modify the faculty-submitted marks and will be recorded in the review history.
+            </div>
+          </div>
+
+          {editHeadModal.error && (
+            <p className="text-xs text-rose-600 font-bold flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" /> {editHeadModal.error}
+            </p>
+          )}
+
+          {/* Modal Action Buttons */}
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <Button
+              variant="outline"
+              onClick={() => setEditHeadModal((prev) => ({ ...prev, isOpen: false }))}
+              disabled={editHeadModal.isSaving}
+              className="cursor-pointer text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveHeadModification}
+              disabled={editHeadModal.isSaving}
+              className="cursor-pointer font-bold text-xs"
+            >
+              {editHeadModal.isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* AUDIT HISTORY MODAL */}
+      <Dialog
+        isOpen={auditModal.isOpen}
+        onClose={() => setAuditModal((prev) => ({ ...prev, isOpen: false }))}
+        title={`Review & Modification History — ${viewingFaculty?.name}`}
+        className="max-w-2xl"
+      >
+        <div className="space-y-3 pt-2">
+          {auditModal.isLoading ? (
+            <div className="py-8 text-center text-xs text-slate-500">Loading audit trail...</div>
+          ) : auditModal.records.length === 0 ? (
+            <div className="py-8 text-center text-xs text-slate-400">
+              No administrative mark modifications recorded for this period.
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {auditModal.records.map((rec, i) => (
+                <div key={rec.id || i} className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+                  <div className="flex justify-between items-center">
+                    <strong className="text-blue-900 font-bold">Head #{rec.head_number} Modified</strong>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      {rec.changed_at ? new Date(rec.changed_at).toLocaleString() : ''}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-slate-500">Original Marks:</span>{' '}
+                      <strong className="font-mono">{rec.original_marks ?? 'N/A'}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Revised Marks:</span>{' '}
+                      <strong className="font-mono text-amber-700">{rec.revised_marks}</strong>
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-slate-600 pt-1 border-t border-slate-150">
+                    Modified by: <strong>{rec.changed_by_admin_name || rec.changed_by_admin_id}</strong>
+                    {rec.reference_document_name && ` • Evidence: ${rec.reference_document_name}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </Dialog>
 
       {/* Reference Document Full Viewer Modal */}

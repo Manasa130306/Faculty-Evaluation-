@@ -95,142 +95,126 @@ export default function FacultyEvaluationPortal() {
     fileName: '',
   });
 
-  // Final Report Expanded Months Accordion State
-  const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({
-    July: true,
-    August: true,
-    September: true,
-  });
-  const [reportMonthFilter, setReportMonthFilter] = useState<string>('all');
-
-  // Local form state for Head 1-8 marks and uploaded files
+  // Local Form State for Heads 1 to 8
   const [headFormState, setHeadFormState] = useState<
     Record<
       number,
       {
         marks: string;
-        file_name?: string;
-        file_path?: string;
-        file_size?: number;
-        file_type?: string;
-        file_url?: string;
+        file_name: string;
+        file_path: string;
+        file_size: number;
+        file_type: string;
+        file_url: string;
+        reference_info: string;
       }
     >
   >({
-    1: { marks: '' },
-    2: { marks: '' },
-    3: { marks: '' },
-    4: { marks: '' },
-    5: { marks: '' },
-    6: { marks: '' },
-    7: { marks: '' },
-    8: { marks: '' },
+    1: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    2: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    3: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    4: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    5: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    6: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    7: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
+    8: { marks: '', file_name: '', file_path: '', file_size: 0, file_type: '', file_url: '', reference_info: '' },
   });
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Active Month Framework Rules
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const monthFramework = getMonthFramework(selectedMonth);
 
-  // Load evaluation record & annual evaluation data
+  // Load Active Evaluation and Annual History
   useEffect(() => {
-    if (!user) return;
+    let isMounted = true;
 
-    const loadData = async () => {
+    async function loadData() {
+      if (!user) return;
       setIsLoading(true);
       setErrorMsg(null);
-      setFileErrorMsg(null);
+
       try {
-        const locked = await DataService.isMonthLocked(selectedYear, selectedMonth);
+        const [locked, evalData, allAnnual] = await Promise.all([
+          DataService.isMonthLocked(selectedYear, selectedMonth),
+          DataService.getEvaluation(user.faculty_id, selectedYear, selectedMonth),
+          DataService.getFacultyAnnualEvaluations(user.faculty_id, selectedYear),
+        ]);
+
+        if (!isMounted) return;
+
         setIsMonthLocked(locked);
-
-        const evalData = await DataService.getEvaluation(user.faculty_id, selectedYear, selectedMonth);
         setEvaluation(evalData);
-
-        const allAnnual = await DataService.getFacultyAnnualEvaluations(user.faculty_id, selectedYear);
         setAnnualEvaluations(allAnnual);
 
-        const initialFormState: Record<
-          number,
-          {
-            marks: string;
-            file_name?: string;
-            file_path?: string;
-            file_size?: number;
-            file_type?: string;
-            file_url?: string;
-          }
-        > = {
-          1: { marks: '' },
-          2: { marks: '' },
-          3: { marks: '' },
-          4: { marks: '' },
-          5: { marks: '' },
-          6: { marks: '' },
-          7: { marks: '' },
-          8: { marks: '' },
-        };
-
-        if (evalData.head_marks) {
-          Object.values(evalData.head_marks).forEach((hm: EvaluationHeadMark) => {
-            initialFormState[hm.head_number] = {
-              marks: hm.marks !== null && hm.marks !== undefined ? String(hm.marks) : '',
-              file_name: hm.file_name || '',
-              file_path: hm.file_path || '',
-              file_url:
-                hm.file_url ||
-                (hm.file_path
-                  ? hm.file_path.startsWith('http') || hm.file_path.startsWith('data:')
-                    ? hm.file_path
-                    : `/api/drive/file/${hm.file_path}`
-                  : ''),
-            };
-          });
+        // Populate local state
+        const newFormState: any = {};
+        for (let i = 1; i <= 8; i++) {
+          const hm = evalData.head_marks?.[i];
+          newFormState[i] = {
+            marks: hm && hm.marks !== null && hm.marks !== undefined ? String(hm.marks) : '',
+            file_name: hm?.file_name || '',
+            file_path: hm?.file_path || '',
+            file_size: hm?.file_size || 0,
+            file_type: hm?.file_type || '',
+            file_url: hm?.file_url || (hm?.file_path ? `/api/drive/file/${hm.file_path}` : ''),
+            reference_info: hm?.reference_info || '',
+          };
         }
-
-        setHeadFormState(initialFormState);
+        setHeadFormState(newFormState);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Error loading evaluation record.';
+        if (!isMounted) return;
+        const message = err instanceof Error ? err.message : 'Failed to load evaluation data.';
         setErrorMsg(message);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
-    };
+    }
 
     loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, selectedYear, selectedMonth]);
 
+  // Handle Score / Input Change
   const handleMarksChange = (headNum: number, value: string) => {
-    setHeadFormState((prev) => ({
-      ...prev,
-      [headNum]: {
-        ...prev[headNum],
-        marks: value,
-      },
-    }));
-  };
+    const metric = monthFramework.heads[headNum];
+    const max = metric?.maxMarks ?? 0;
 
-  // Upload Document Reference with STRICT 1 MB Limit (1,048,576 bytes)
-  const handleFileUpload = async (headNum: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    // Strict 1 MB Frontend Validation
-    const MAX_FILE_SIZE_BYTES = 1048576; // 1 MB = 1,048,576 bytes
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setFileErrorMsg('File size must be 1 MB or less.');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+    if (value === '') {
+      setHeadFormState((prev) => ({
+        ...prev,
+        [headNum]: { ...prev[headNum], marks: '' },
+      }));
       return;
     }
 
-    setIsUploadingFile(true);
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+      if (num < 0) return;
+      if (num > max) {
+        setErrorMsg(`Maximum allowed score for ${metric?.name} in ${selectedMonth} is ${max} marks.`);
+        return;
+      }
+    }
+
     setErrorMsg(null);
+    setHeadFormState((prev) => ({
+      ...prev,
+      [headNum]: { ...prev[headNum], marks: value },
+    }));
+  };
+
+  // Handle Document Upload
+  const handleFileUpload = async (headNum: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
     setFileErrorMsg(null);
+    setIsUploadingFile(true);
 
     try {
-      const uploadRes = await DataService.uploadReferenceDocument(
+      const uploadedDoc = await DataService.uploadReferenceDocument(
         user.faculty_id,
         selectedYear,
         selectedMonth,
@@ -242,11 +226,11 @@ export default function FacultyEvaluationPortal() {
         ...prev,
         [headNum]: {
           ...prev[headNum],
-          file_name: uploadRes.file_name,
-          file_path: uploadRes.file_path,
-          file_size: uploadRes.file_size,
-          file_type: uploadRes.file_type,
-          file_url: uploadRes.file_url,
+          file_name: uploadedDoc.file_name,
+          file_path: uploadedDoc.file_path,
+          file_size: uploadedDoc.file_size,
+          file_type: uploadedDoc.file_type,
+          file_url: uploadedDoc.file_url,
         },
       }));
     } catch (err: unknown) {
@@ -285,6 +269,11 @@ export default function FacultyEvaluationPortal() {
 
     // Zero-weightage heads do not require validation
     if (isWeightageZero) {
+      return true;
+    }
+
+    // If head was modified by admin, do not allow faculty edit
+    if (evaluation?.head_marks?.[headNum]?.is_admin_modified) {
       return true;
     }
 
@@ -432,6 +421,7 @@ export default function FacultyEvaluationPortal() {
   const isSubmitted = evaluation?.status === 'submitted';
   const isReadOnly = isMonthLocked || isSubmitted;
   const activeMetric = monthFramework.heads[currentStep];
+  const isCurrentHeadAdminModified = evaluation?.head_marks?.[currentStep]?.is_admin_modified;
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 pb-12 items-start">
@@ -448,105 +438,105 @@ export default function FacultyEvaluationPortal() {
             <div className="min-w-0">
               <h2 className="text-xs font-bold text-slate-900 truncate">{user?.name}</h2>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono text-blue-700 bg-blue-50 border-blue-200">
+                <span className="font-mono text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded font-semibold border border-blue-100">
                   {user?.faculty_id}
-                </Badge>
+                </span>
+                <span className="text-[10px] text-slate-500 truncate">{user?.department}</span>
               </div>
-              <p className="text-[10px] text-slate-500 truncate mt-0.5">{user?.department}</p>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Navigation Items */}
+        {/* View Switcher Navigation */}
         <nav className="bg-white p-2 rounded-xl border border-slate-200/80 shadow-xs space-y-1">
           <button
-            type="button"
             onClick={() => setActiveView('dashboard')}
-            className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left ${
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               activeView === 'dashboard'
-                ? 'bg-blue-700 text-white shadow-xs'
-                : 'text-slate-700 hover:bg-slate-100'
+                ? 'bg-blue-700 text-white'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>Dashboard</span>
+            <span>Dashboard Overview</span>
           </button>
 
           <button
-            type="button"
             onClick={() => {
               setActiveView('evaluation');
               setCurrentStep(1);
             }}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left ${
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               activeView === 'evaluation'
-                ? 'bg-blue-700 text-white shadow-xs'
-                : 'text-slate-700 hover:bg-slate-100'
+                ? 'bg-blue-700 text-white'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             <div className="flex items-center gap-2.5">
               <FileCheck className="w-4 h-4 shrink-0" />
               <span>Current Evaluation</span>
             </div>
-            {isSubmitted ? (
+            {isSubmitted && (
               <Badge variant="success" className="text-[9px] py-0 px-1">
                 Submitted
-              </Badge>
-            ) : (
-              <Badge variant="warning" className="text-[9px] py-0 px-1">
-                Draft
               </Badge>
             )}
           </button>
 
           <button
-            type="button"
             onClick={() => setActiveView('final_report')}
-            className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-left ${
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               activeView === 'final_report'
-                ? 'bg-blue-700 text-white shadow-xs'
-                : 'text-slate-700 hover:bg-slate-100'
+                ? 'bg-blue-700 text-white'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             <FileSpreadsheet className="w-4 h-4 shrink-0" />
-            <span>Final Report</span>
+            <span>Final Report (.xlsx)</span>
           </button>
         </nav>
 
-        {/* Quick Evaluation Cycle Selector Widget */}
+        {/* Period Slicer Selector */}
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-            <Calendar className="w-4 h-4 text-blue-700" />
-            <span>Appraisal Cycle</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-blue-700" /> Evaluation Period
+            </span>
           </div>
 
           <div className="space-y-2">
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">Academic Year</label>
+              <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
+                Academic Year
+              </label>
               <Select
-                value={String(selectedYear)}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="h-8 text-xs font-semibold"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="h-8 text-xs font-medium"
               >
-                <option value="2026">2026 &ndash; 2027</option>
-                <option value="2025">2025 &ndash; 2026</option>
-                <option value="2024">2024 &ndash; 2025</option>
+                {[2024, 2025, 2026, 2027].map((y) => (
+                  <option key={y} value={y}>
+                    Year: {y}
+                  </option>
+                ))}
               </Select>
             </div>
 
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">Target Month</label>
+              <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
+                Appraisal Month
+              </label>
               <Select
                 value={selectedMonth}
                 onChange={(e) => {
                   setSelectedMonth(e.target.value);
                   setCurrentStep(1);
                 }}
-                className="h-8 text-xs font-semibold"
+                className="h-8 text-xs font-medium"
               >
                 {MONTHS.map((m) => (
                   <option key={m} value={m}>
-                    {m}
+                    {m} ({getMonthFramework(m).totalMarks} Marks)
                   </option>
                 ))}
               </Select>
@@ -778,6 +768,7 @@ export default function FacultyEvaluationPortal() {
                     const isZeroWeight = (metric?.maxMarks ?? 0) === 0;
                     const val = headFormState[head.number]?.marks;
                     const hasFile = !!headFormState[head.number]?.file_name;
+                    const isHeadAdminModified = evaluation?.head_marks?.[head.number]?.is_admin_modified;
 
                     return (
                       <div
@@ -786,13 +777,17 @@ export default function FacultyEvaluationPortal() {
                           setActiveView('evaluation');
                           setCurrentStep(head.number);
                         }}
-                        className="p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
+                        className={`p-4 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer ${
+                          isHeadAdminModified ? 'bg-amber-50/30' : ''
+                        }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
                               isZeroWeight
                                 ? 'bg-slate-100 text-slate-400'
+                                : isHeadAdminModified
+                                ? 'bg-amber-100 text-amber-900 font-bold'
                                 : val
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-blue-50 text-blue-700'
@@ -801,7 +796,14 @@ export default function FacultyEvaluationPortal() {
                             H{head.number}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-slate-900">Head {head.number}: {head.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-slate-900">Head {head.number}: {head.name}</p>
+                              {isHeadAdminModified && (
+                                <Badge variant="warning" className="text-[9px] px-1.5 py-0">
+                                  Modified by Admin
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-[11px] text-slate-500">{metric?.description || head.name}</p>
                           </div>
                         </div>
@@ -844,6 +846,7 @@ export default function FacultyEvaluationPortal() {
                 const metric = monthFramework.heads[head.number];
                 const isZero = (metric?.maxMarks ?? 0) === 0;
                 const hasValue = headFormState[head.number]?.marks !== '';
+                const isMod = evaluation?.head_marks?.[head.number]?.is_admin_modified;
 
                 return (
                   <button
@@ -855,6 +858,8 @@ export default function FacultyEvaluationPortal() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                       isCurrent
                         ? 'bg-blue-700 text-white shadow-xs'
+                        : isMod
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300'
                         : hasValue && !isZero
                         ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                         : isZero
@@ -863,7 +868,8 @@ export default function FacultyEvaluationPortal() {
                     }`}
                   >
                     <span>H{head.number}</span>
-                    {hasValue && !isZero && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                    {isMod && <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />}
+                    {hasValue && !isZero && !isMod && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
                   </button>
                 );
               })}
@@ -890,9 +896,16 @@ export default function FacultyEvaluationPortal() {
                 <CardHeader className="bg-slate-50/70 border-b border-slate-200 pb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
-                        Head {currentStep} of 8 &bull; {selectedMonth} {selectedYear}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
+                          Head {currentStep} of 8 &bull; {selectedMonth} {selectedYear}
+                        </span>
+                        {isCurrentHeadAdminModified && (
+                          <Badge variant="warning" className="text-[10px]">
+                            Modified by Admin
+                          </Badge>
+                        )}
+                      </div>
                       <CardTitle className="text-xl text-slate-900 mt-1">
                         {activeMetric.name}
                       </CardTitle>
@@ -911,6 +924,42 @@ export default function FacultyEvaluationPortal() {
                 </CardHeader>
 
                 <CardContent className="p-6 space-y-6">
+                  {/* ADMIN MODIFICATION NOTIFICATION BANNER (Part 6) */}
+                  {isCurrentHeadAdminModified && evaluation?.head_marks?.[currentStep] && (
+                    <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 space-y-2">
+                      <div className="flex items-center gap-2 font-bold text-amber-950">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>Head {currentStep} marks were modified by Admin after review.</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-amber-200 text-[11px]">
+                        <div>
+                          <span className="text-slate-600 block">Original Marks:</span>
+                          <strong className="font-mono text-slate-900">
+                            {evaluation.head_marks[currentStep].original_faculty_marks ?? 'N/A'}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-600 block">Final Marks:</span>
+                          <strong className="font-mono text-amber-900 font-bold">
+                            {evaluation.head_marks[currentStep].marks}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-600 block">Status:</span>
+                          <strong className="text-amber-800">Modified by Admin</strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-600 block">Reviewed on:</span>
+                          <strong className="text-slate-700">
+                            {evaluation.head_marks[currentStep].admin_modified_at
+                              ? new Date(evaluation.head_marks[currentStep].admin_modified_at!).toLocaleDateString()
+                              : 'Approved'}
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Zero weightage note */}
                   {activeMetric.maxMarks === 0 ? (
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500">
@@ -949,7 +998,7 @@ export default function FacultyEvaluationPortal() {
                             step="0.5"
                             min="0"
                             max={activeMetric.maxMarks}
-                            disabled={isReadOnly}
+                            disabled={isReadOnly || isCurrentHeadAdminModified}
                             value={headFormState[currentStep]?.marks || ''}
                             onChange={(e) => handleMarksChange(currentStep, e.target.value)}
                             placeholder={`Enter score out of ${activeMetric.maxMarks}`}
@@ -959,6 +1008,11 @@ export default function FacultyEvaluationPortal() {
                             / {activeMetric.maxMarks} Marks Max
                           </span>
                         </div>
+                        {isCurrentHeadAdminModified && (
+                          <p className="text-[11px] text-amber-800 mt-1 font-medium">
+                            This score was reviewed and approved by Admin and is locked from further faculty edits.
+                          </p>
+                        )}
                       </div>
 
                       {/* Reference Document Upload Section with 1 MB Limit */}
@@ -1012,7 +1066,7 @@ export default function FacultyEvaluationPortal() {
                                   <span>View</span>
                                 </button>
 
-                                {!isReadOnly && (
+                                {!isReadOnly && !isCurrentHeadAdminModified && (
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveFile(currentStep)}
@@ -1044,7 +1098,7 @@ export default function FacultyEvaluationPortal() {
                               </div>
                             )}
                           </div>
-                        ) : !isReadOnly ? (
+                        ) : !isReadOnly && !isCurrentHeadAdminModified ? (
                           <div className="mt-2">
                             <input
                               ref={fileInputRef}
@@ -1139,12 +1193,20 @@ export default function FacultyEvaluationPortal() {
                         const m = monthFramework.heads[h.number];
                         const val = headFormState[h.number]?.marks;
                         const doc = headFormState[h.number];
+                        const isMod = evaluation?.head_marks?.[h.number]?.is_admin_modified;
 
                         return (
                           <TableRow key={h.number} className="hover:bg-slate-50/50">
                             <TableCell className="font-mono font-bold text-slate-600">H{h.number}</TableCell>
                             <TableCell>
-                              <span className="font-bold text-slate-800 block">{m?.name || h.name}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-800">{m?.name || h.name}</span>
+                                {isMod && (
+                                  <Badge variant="warning" className="text-[9px] px-1 py-0">
+                                    Modified by Admin
+                                  </Badge>
+                                )}
+                              </div>
                               <span className="text-[11px] text-slate-400">{m?.description || ''}</span>
                             </TableCell>
                             <TableCell className="text-center font-mono font-semibold text-slate-500">
