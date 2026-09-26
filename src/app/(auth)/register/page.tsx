@@ -94,7 +94,7 @@ export default function FacultyRegisterPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8">
-      {/* Background Campus Image with Overlay */}
+      {/* Background Campus Image with Clear Balanced Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/campus_background.jpg"
@@ -103,7 +103,7 @@ export default function FacultyRegisterPage() {
           priority
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-slate-900/45" />
       </div>
 
       <div className="relative z-10 w-full max-w-lg">
