@@ -957,39 +957,7 @@ export const DataService = {
     evals[key] = evaluation;
     setLocalData(STORAGE_KEYS.EVALUATIONS, evals);
 
-    // CLEANUP DRIVE FILES AFTER H1
-    if (isAdminUpdate && headNumber === 1 && marks !== null) {
-      const fileIdsToDelete: string[] = [];
-      const evaluationId = evaluation.id; // get id for DB updates
-      for (let i = 2; i <= 8; i++) {
-        const file_path = headMarks[i]?.file_path;
-        if (file_path && file_path.length > 0) {
-          fileIdsToDelete.push(file_path);
-          headMarks[i].file_path = '';
-          headMarks[i].file_url = '';
-        }
-      }
-      
-      if (fileIdsToDelete.length > 0) {
-        try {
-          const { cleanupReferenceFilesAction } = await import('@/app/actions/drive');
-          await cleanupReferenceFilesAction(cleanId, year, month, fileIdsToDelete);
-          
-          if (isSupabaseConfigured()) {
-            for (let i = 2; i <= 8; i++) {
-              await supabase.from('evaluation_heads')
-                .update({ reference_document_path: null })
-                .eq('evaluation_id', evaluationId)
-                .eq('head_number', i);
-            }
-          }
-        } catch (err) {
-          console.warn('Failed to cleanup drive files:', err);
-        }
-      }
-    }
-
-    // UPDATE MONTHLY EXCEL REPORT IN DRIVE
+    // UPDATE MONTHLY EXCEL REPORT IN DRIVE (Reference documents are retained in Drive for 2 months)
     try {
        await this.triggerMonthlyExcelUpdate(year, month);
     } catch (err) {
