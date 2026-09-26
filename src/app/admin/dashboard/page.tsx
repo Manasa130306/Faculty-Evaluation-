@@ -101,6 +101,25 @@ export default function AdminDashboardPage() {
   }, [selectedYear, selectedMonth]);
 
   const handleConnectDrive = () => {
+    if (typeof document !== 'undefined') {
+      const adminSessionData = {
+        id: user?.id || 'NSRE01',
+        faculty_id: user?.faculty_id || 'NSRE01',
+        role: 'admin',
+        timestamp: Date.now(),
+      };
+      document.cookie = `nsriet_admin_session=${encodeURIComponent(
+        JSON.stringify(adminSessionData)
+      )}; path=/; max-age=604800; SameSite=Lax`;
+
+      try {
+        const token = btoa(JSON.stringify(adminSessionData));
+        window.location.href = `/api/auth/google?admin_token=${encodeURIComponent(token)}`;
+        return;
+      } catch {
+        // Fallback
+      }
+    }
     window.location.href = '/api/auth/google';
   };
 

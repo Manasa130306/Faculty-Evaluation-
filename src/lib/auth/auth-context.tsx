@@ -54,6 +54,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Keep admin session cookie synchronized whenever user state changes
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (user?.role === 'admin') {
+        const adminSessionData = {
+          id: user.id || 'NSRE01',
+          faculty_id: user.faculty_id || 'NSRE01',
+          role: 'admin',
+          timestamp: Date.now(),
+        };
+        document.cookie = `nsriet_admin_session=${encodeURIComponent(
+          JSON.stringify(adminSessionData)
+        )}; path=/; max-age=604800; SameSite=Lax`;
+      }
+    }
+  }, [user]);
+
   const saveCustomPassword = (facultyId: string, pass: string) => {
     const p = getCustomPasswords();
     p[facultyId.toUpperCase()] = pass;
