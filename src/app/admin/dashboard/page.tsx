@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
 import { DataService } from '@/lib/services/data-service';
 import { CURRENT_DEFAULT_YEAR, CURRENT_DEFAULT_MONTH, MONTHS } from '@/lib/constants/heads';
@@ -11,10 +12,22 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Users, CheckCircle2, Clock, Building2, Calendar, AlertCircle, ExternalLink } from 'lucide-react';
+import {
+  Users,
+  CheckCircle2,
+  Clock,
+  Building2,
+  Calendar,
+  AlertCircle,
+  ExternalLink,
+  HardDrive,
+  RefreshCw,
+  X
+} from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_DEFAULT_YEAR);
   const [selectedMonth, setSelectedMonth] = useState<string>(CURRENT_DEFAULT_MONTH);
 
@@ -41,24 +54,55 @@ export default function AdminDashboardPage() {
     >;
   } | null>(null);
 
+  const [driveStatus, setDriveStatus] = useState<{
+    connected: boolean;
+    authMethod: string;
+    hasOAuthClientId: boolean;
+    hasRefreshToken: boolean;
+    tokenSource: string;
+  } | null>(null);
+
   const [isPendingModalOpen, setIsPendingModalOpen] = useState<boolean>(false);
   const [isSubmittedModalOpen, setIsSubmittedModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authBanner, setAuthBanner] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadMetrics = async () => {
+    const driveAuthParam = searchParams.get('drive_auth');
+    const reason = searchParams.get('reason');
+    if (driveAuthParam === 'success') {
+      setAuthBanner('Google Drive OAuth 2.0 authorization completed successfully! Refresh token persisted.');
+    } else if (driveAuthParam === 'error') {
+      setAuthBanner(`Google Drive OAuth error: ${reason || 'Failed to authorize'}`);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await DataService.getDashboardMetrics(selectedYear, selectedMonth);
+        const [data, driveRes] = await Promise.all([
+          DataService.getDashboardMetrics(selectedYear, selectedMonth),
+          fetch('/api/auth/google/status')
+            .then((r) => r.json())
+            .catch(() => null),
+        ]);
         setMetrics(data);
+        if (driveRes && !driveRes.error) {
+          setDriveStatus(driveRes);
+        }
       } catch (err) {
         console.error('Failed to load dashboard metrics:', err);
       } finally {
         setIsLoading(false);
       }
     };
-    loadMetrics();
+    loadData();
   }, [selectedYear, selectedMonth]);
+
+  const handleConnectDrive = () => {
+    window.location.href = '/api/auth/google';
+  };
 
   const formatDateTime = (dateStr: string | null) => {
     if (!dateStr) return '—';
@@ -78,8 +122,34 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header & Period Slicer */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
+      {/* Google OAuth Banner */}
+      {authBanner && (
+        <div
+          className={`p-4 rounded-xl flex items-center justify-between text-sm font-medium border ${
+            authBanner.includes('success')
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {authBanner.includes('success') ? (
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+            )}
+            <span>{authBanner}</span>
+          </div>
+          <button
+            onClick={() => setAuthBanner(null)}
+            className="p-1 hover:bg-black/5 rounded text-slate-500"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Top Header & Period Slicer & Drive OAuth Action */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Executive Dashboard</h1>
           <p className="text-xs text-slate-500 mt-1">
@@ -87,31 +157,56 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-          <Calendar className="w-4 h-4 text-slate-500 ml-1 shrink-0" />
-          <Select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="h-8 text-xs font-semibold py-0 px-2 w-24"
-          >
-            {[2024, 2025, 2026, 2027].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </Select>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Drive Integration Status / Button */}
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+            <HardDrive className="w-4 h-4 text-blue-600 shrink-0" />
+            <div className="text-xs">
+              <span className="font-semibold text-slate-700">Drive: </span>
+              {driveStatus?.connected ? (
+                <span className="text-emerald-700 font-bold">Connected ({driveStatus.authMethod})</span>
+              ) : (
+                <span className="text-amber-700 font-semibold">Not Connected</span>
+              )}
+            </div>
+            <Button
+              onClick={handleConnectDrive}
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs font-semibold py-0 px-2.5 ml-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              {driveStatus?.connected ? 'Re-authorize' : 'Connect Drive'}
+            </Button>
+          </div>
 
-          <Select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="h-8 text-xs font-semibold py-0 px-2 w-32"
-          >
-            {MONTHS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </Select>
+          {/* Period Selector */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+            <Calendar className="w-4 h-4 text-slate-500 ml-1 shrink-0" />
+            <Select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="h-8 text-xs font-semibold py-0 px-2 w-24"
+            >
+              {[2024, 2025, 2026, 2027].map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="h-8 text-xs font-semibold py-0 px-2 w-32"
+            >
+              {MONTHS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </Select>
+          </div>
         </div>
       </div>
 

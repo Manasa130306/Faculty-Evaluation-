@@ -1,37 +1,95 @@
 import { google } from 'googleapis';
 import { Readable } from 'stream';
+import { createClient } from '@/lib/supabase/server';
 
-const ROOT_FOLDER_ID = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || "1Zwrtf8NLZ0kL_kvPhIfKHuT5mJGLx4fG";
+const ROOT_FOLDER_ID =
+  process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || '1Zwrtf8NLZ0kL_kvPhIfKHuT5mJGLx4fG';
 
 export function isDriveConfigured(): boolean {
-  return !!(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY);
+  const hasOAuthEnv = !!(
+    process.env.GOOGLE_CLIENT_ID &&
+    process.env.GOOGLE_CLIENT_SECRET &&
+    (process.env.GOOGLE_REFRESH_TOKEN || true) // True if OAuth configured (token can also come from DB)
+  );
+
+  const hasServiceAccount = !!(
+    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY
+  );
+
+  return hasOAuthEnv || hasServiceAccount;
 }
 
-export function getDriveClient() {
+/**
+ * Retrieve the OAuth 2.0 refresh token from environment variables or Supabase system_settings.
+ */
+async function getStoredRefreshToken(): Promise<string | null> {
+  if (process.env.GOOGLE_REFRESH_TOKEN) {
+    return process.env.GOOGLE_REFRESH_TOKEN;
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('system_settings')
+      .select('value')
+      .eq('key', 'google_drive_refresh_token')
+      .single();
+
+    if (data?.value) {
+      return data.value;
+    }
+  } catch {
+    // If table doesn't exist yet or query fails, return null
+  }
+
+  return null;
+}
+
+/**
+ * Instantiate Google Drive client using OAuth 2.0 user authorization with Service Account fallback.
+ */
+export async function getDriveClient() {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const redirectUri =
+    process.env.GOOGLE_REDIRECT_URI ||
+    'https://facultymarks.vercel.app/api/auth/google/callback';
+
+  const refreshToken = await getStoredRefreshToken();
+
+  // 1. Primary: OAuth 2.0 User Authorization (iqacoffice@nsriet.edu.in)
+  if (clientId && clientSecret && refreshToken) {
+    const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+    oauth2Client.setCredentials({
+      refresh_token: refreshToken,
+    });
+    return google.drive({ version: 'v3', auth: oauth2Client });
+  }
+
+  // 2. Secondary Fallback: Service Account
   const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
   let privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
-  if (!clientEmail || !privateKey) {
-    throw new Error('Google Drive credentials not configured. Please set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY.');
+  if (clientEmail && privateKey) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
+      scopes: ['https://www.googleapis.com/auth/drive'],
+    });
+    return google.drive({ version: 'v3', auth });
   }
 
-  // Handle escaped newlines in env variables
-  privateKey = privateKey.replace(/\\n/g, '\n');
-
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: clientEmail,
-      private_key: privateKey,
-    },
-    scopes: ['https://www.googleapis.com/auth/drive'],
-  });
-
-  return google.drive({ version: 'v3', auth });
+  throw new Error(
+    'Google Drive is not authenticated. Please connect Google Drive via the Admin Dashboard or set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN.'
+  );
 }
 
 export async function findOrCreateFolder(name: string, parentId: string): Promise<string> {
-  const drive = getDriveClient();
-  
+  const drive = await getDriveClient();
+
   // Look for existing non-trashed folder
   const res = await drive.files.list({
     q: `mimeType='application/vnd.google-apps.folder' and name='${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed=false`,
@@ -65,19 +123,21 @@ export async function findOrCreateFolder(name: string, parentId: string): Promis
  * Get or create the standard hierarchy:
  * Root -> Faculty Monthly Appraisal -> [Year] -> [Month] -> References
  */
-export async function getMonthFolder(year: number, month: string): Promise<{
+export async function getMonthFolder(
+  year: number,
+  month: string
+): Promise<{
   appraisalFolderId: string;
   yearFolderId: string;
   monthFolderId: string;
   referencesFolderId: string;
 }> {
-  const drive = getDriveClient();
+  const drive = await getDriveClient();
   const rootId = ROOT_FOLDER_ID;
 
   let appraisalFolderId = rootId;
 
   try {
-    // Check if root folder itself is named "Faculty Monthly Appraisal"
     const rootMeta = await drive.files.get({
       fileId: rootId,
       fields: 'id, name',
@@ -88,7 +148,6 @@ export async function getMonthFolder(year: number, month: string): Promise<{
       appraisalFolderId = await findOrCreateFolder('Faculty Monthly Appraisal', rootId);
     }
   } catch {
-    // If fetching root metadata fails, attempt to create/find under rootId directly
     appraisalFolderId = await findOrCreateFolder('Faculty Monthly Appraisal', rootId);
   }
 
@@ -115,7 +174,10 @@ export async function getFacultyHeadFolder(
   headNumber: number
 ): Promise<string> {
   const { referencesFolderId } = await getMonthFolder(year, month);
-  const facultyFolderId = await findOrCreateFolder(facultyId.trim().toUpperCase(), referencesFolderId);
+  const facultyFolderId = await findOrCreateFolder(
+    facultyId.trim().toUpperCase(),
+    referencesFolderId
+  );
   const headFolderId = await findOrCreateFolder(`H${headNumber}`, facultyFolderId);
   return headFolderId;
 }
@@ -126,7 +188,7 @@ export async function uploadFileToDrive(
   mimeType: string,
   parentId: string
 ): Promise<{ fileId: string; fileUrl: string }> {
-  const drive = getDriveClient();
+  const drive = await getDriveClient();
 
   const stream = new Readable();
   stream.push(buffer);
@@ -157,14 +219,13 @@ export async function uploadFileToDrive(
 
 export async function deleteFileFromDrive(fileId: string): Promise<void> {
   if (!fileId) return;
-  const drive = getDriveClient();
+  const drive = await getDriveClient();
   try {
     await drive.files.delete({
       fileId,
       supportsAllDrives: true,
     });
   } catch (err: any) {
-    // If file already deleted or not found (404), do not crash
     if (err?.code !== 404 && err?.status !== 404) {
       throw err;
     }
@@ -176,7 +237,7 @@ export async function updateExcelReportInDrive(
   fileName: string,
   parentId: string
 ): Promise<{ fileId: string }> {
-  const drive = getDriveClient();
+  const drive = await getDriveClient();
 
   const res = await drive.files.list({
     q: `name='${fileName.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed=false`,
@@ -219,8 +280,8 @@ export async function updateExcelReportInDrive(
 }
 
 export async function getDriveFileMetadataAndStream(fileId: string) {
-  const drive = getDriveClient();
-  
+  const drive = await getDriveClient();
+
   const meta = await drive.files.get({
     fileId,
     fields: 'id, name, mimeType, size',
