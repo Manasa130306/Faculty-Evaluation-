@@ -1,16 +1,24 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { GraduationCap, ShieldCheck, UserCheck, CheckCircle2, ArrowRight } from 'lucide-react';
+import {
+  GraduationCap,
+  Shield,
+  BarChart3,
+  Users,
+  ArrowRight,
+  Menu,
+  X
+} from 'lucide-react';
 
 export default function HomePage() {
   const { user, role, isLoading } = useAuth();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -23,115 +31,326 @@ export default function HomePage() {
   }, [user, role, isLoading, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 flex flex-col justify-between">
-      {/* Top Header */}
-      <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center font-bold shadow-md">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="font-bold text-lg text-slate-900 tracking-tight">NSRIET</span>
-              <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                Performance Appraisal System
+    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden bg-slate-50 font-sans selection:bg-blue-100 selection:text-[#123B73]">
+      {/* ============================================================ */}
+      {/* 1. HERO BACKGROUND IMAGE WITH REFINED GRADIENT OVERLAYS */}
+      {/* ============================================================ */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Campus Background Image */}
+        <Image
+          src="/campus_background.jpg"
+          alt="NSRIET Campus"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center scale-100 transition-transform duration-1000"
+        />
+
+        {/* Left side subtle white-to-transparent gradient for crisp text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent w-full md:w-[75%] lg:w-[60%]" />
+
+        {/* Global gentle top-to-bottom atmospheric wash */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-blue-900/10" />
+      </div>
+
+      {/* ============================================================ */}
+      {/* 2. TOP FLOATING NAVBAR */}
+      {/* ============================================================ */}
+      <header className="relative z-30 w-full pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-4 sm:px-8 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100/80 flex items-center justify-between transition-all">
+          {/* Left Brand Badge */}
+          <Link href="/" className="flex items-center gap-3 sm:gap-4 group">
+            {/* NSRIET Logo Badge */}
+            <div className="relative bg-[#123B73] px-3.5 py-1.5 rounded-lg flex items-center justify-center shadow-inner group-hover:bg-[#0e2f5c] transition-colors">
+              {/* Red Top Accent Bar */}
+              <div className="absolute -top-0.5 right-2 w-4 h-1 bg-[#DC2626] rounded-full" />
+              <span className="font-extrabold text-white text-base sm:text-lg tracking-wider font-sans">
+                NSRIET
               </span>
             </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Faculty Login
-              </Button>
+
+            {/* Vertical Separator */}
+            <div className="h-7 w-[1.5px] bg-slate-300 hidden xs:block" />
+
+            {/* Full College Name */}
+            <div className="hidden xs:flex flex-col text-left">
+              <span className="text-[11px] sm:text-[13px] font-bold tracking-tight text-[#123B73] leading-tight uppercase font-sans">
+                N S Raju Institute of
+              </span>
+              <span className="text-[10px] sm:text-[12px] font-semibold tracking-wider text-[#123B73] leading-tight uppercase font-sans opacity-95">
+                Engineering & Technology
+              </span>
+            </div>
+          </Link>
+
+          {/* Right Navigation Menu (Desktop) */}
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            <Link
+              href="/"
+              className="text-[#123B73] font-semibold text-sm relative py-1 border-b-2 border-blue-600 transition-colors"
+            >
+              Home
             </Link>
-            <Link href="/admin-login">
-              <Button variant="primary" size="sm">
-                Admin Portal
-              </Button>
+            <Link
+              href="#about"
+              className="text-slate-600 hover:text-[#123B73] font-medium text-sm transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              href="#framework"
+              className="text-slate-600 hover:text-[#123B73] font-medium text-sm transition-colors"
+            >
+              Evaluation Framework
+            </Link>
+            <Link
+              href="#contact"
+              className="text-slate-600 hover:text-[#123B73] font-medium text-sm transition-colors"
+            >
+              Contact
             </Link>
           </div>
-        </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-[#123B73] hover:bg-slate-100 transition"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </nav>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-2 bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-slate-100 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-[#123B73] font-semibold text-sm px-3 py-2 rounded-lg bg-blue-50"
+            >
+              Home
+            </Link>
+            <Link
+              href="#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-700 font-medium text-sm px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              About
+            </Link>
+            <Link
+              href="#framework"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-700 font-medium text-sm px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              Evaluation Framework
+            </Link>
+            <Link
+              href="#contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-slate-700 font-medium text-sm px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              Contact
+            </Link>
+          </div>
+        )}
       </header>
 
-      {/* Hero Body */}
-      <main className="max-w-4xl mx-auto px-4 py-12 flex-1 flex flex-col justify-center items-center text-center">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold mb-6">
-          <CheckCircle2 className="w-4 h-4 text-blue-600" />
-          Official 1000-Mark Annual Performance Appraisal System (July–June)
-        </div>
+      {/* ============================================================ */}
+      {/* 3. HERO BODY (LEFT TEXT & RIGHT PORTAL CARDS) */}
+      {/* ============================================================ */}
+      <main className="relative z-20 flex-1 flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full">
+          {/* ---------------------------------------------------- */}
+          {/* HERO LEFT CONTENT */}
+          {/* ---------------------------------------------------- */}
+          <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left">
+            {/* Small Label with accent line */}
+            <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
+              <span className="w-6 h-[2px] bg-[#2563EB]" />
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#123B73]/90">
+                INTERNAL QUALITY ASSURANCE CELL (IQAC)
+              </span>
+            </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight max-w-2xl leading-tight">
-          N S Raju Institute of Engineering & Technology
-        </h1>
-        <p className="mt-3 text-base sm:text-lg text-slate-600 max-w-xl">
-          Faculty Performance Appraisal System covering all 8 Performance Heads across 12 monthly evaluation cycles
-        </p>
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[50px] font-extrabold tracking-tight leading-[1.12] text-[#123B73]">
+              Faculty Evaluation <br />
+              <span className="text-[#2563EB]">Management System</span>
+            </h1>
 
-        {/* Portal Entry Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 w-full max-w-3xl text-left">
-          {/* Faculty Card */}
-          <Card className="hover:shadow-lg transition-all border-slate-300 hover:border-blue-400 group">
-            <CardHeader className="pb-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3 group-hover:bg-blue-700 group-hover:text-white transition-colors">
-                <UserCheck className="w-6 h-6" />
-              </div>
-              <CardTitle className="text-xl">Faculty Self-Appraisal Portal</CardTitle>
-              <CardDescription>
-                Submit monthly self-evaluations for Heads 2–8, upload evidence documents, preview total scores, and view Head 1 IQAC marks.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <div className="text-xs text-slate-500 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                <span className="font-semibold text-slate-700">Service Register Credentials:</span>
-                <br />
-                Faculty ID: <code className="text-blue-700 font-mono">23TS050009</code> (e.g. Mr Adibabu Riparagiri)
-                <br />
-                Password: <code className="text-blue-700 font-mono">23TS050009@NSRIET</code> or <code className="text-blue-700 font-mono">password123</code>
-              </div>
-              <div className="flex gap-2">
-                <Link href="/login" className="flex-1">
-                  <Button className="w-full font-bold">
-                    Faculty Login <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button variant="outline">Register</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Short Subtext */}
+            <p className="mt-4 sm:mt-5 text-sm sm:text-base text-slate-600 leading-relaxed max-w-lg font-normal">
+              A transparent, structured and technology-driven platform for faculty performance
+              evaluation and document management.
+            </p>
+          </div>
 
-          {/* Admin Card */}
-          <Card className="hover:shadow-lg transition-all border-slate-300 hover:border-blue-400 group">
-            <CardHeader className="pb-3">
-              <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center mb-3 group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                <ShieldCheck className="w-6 h-6" />
+          {/* ---------------------------------------------------- */}
+          {/* HERO RIGHT: DUAL PORTAL CARDS (SIDE-BY-SIDE ON DESKTOP) */}
+          {/* ---------------------------------------------------- */}
+          <div className="lg:col-span-6 xl:col-span-7 flex justify-center lg:justify-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 w-full max-w-2xl">
+              {/* ==================== CARD 1: FACULTY PORTAL ==================== */}
+              <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-white/80 flex flex-col justify-between text-center transform hover:-translate-y-1.5 transition-all duration-300">
+                <div>
+                  {/* Circular Maroon Badge */}
+                  <div className="w-14 h-14 rounded-full bg-[#8B1E1E] text-white flex items-center justify-center mx-auto shadow-md shadow-[#8B1E1E]/20">
+                    <GraduationCap className="w-7 h-7" />
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#8B1E1E] mt-4 mb-2 tracking-tight">
+                    Faculty Portal
+                  </h2>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 font-normal">
+                    Login to submit your monthly evaluation, upload reference documents, and track
+                    your academic contributions.
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-3">
+                  {/* Primary Button */}
+                  <Link href="/login" className="block w-full">
+                    <button className="w-full py-3 px-4 rounded-full bg-[#8B1E1E] hover:bg-[#731717] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                      <span>Login as Faculty</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </Link>
+
+                  {/* Divider */}
+                  <div className="relative py-1">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200" />
+                    </div>
+                    <div className="relative flex justify-center text-[11px]">
+                      <span className="bg-white/95 px-2.5 text-slate-400 font-medium">
+                        New to the system?
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Secondary Button */}
+                  <Link href="/register" className="block w-full">
+                    <button className="w-full py-2.5 px-4 rounded-full border border-[#8B1E1E] text-[#8B1E1E] hover:bg-[#8B1E1E]/5 font-semibold text-xs sm:text-sm transition-all active:scale-[0.98]">
+                      Register as Faculty
+                    </button>
+                  </Link>
+                </div>
               </div>
-              <CardTitle className="text-xl">IQAC Administration Portal</CardTitle>
-              <CardDescription>
-                Executive dashboard, 72 faculty Service Register management, Head 1 entry, SheetJS Excel export, and Month Locking.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <div className="text-xs text-slate-500 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                <span className="font-semibold text-slate-700">Admin Credentials:</span>
-                <br />
-                Admin ID: <code className="text-blue-700 font-mono">ADMIN01</code> / Password:{' '}
-                <code className="text-blue-700 font-mono">admin123</code>
+
+              {/* ==================== CARD 2: ADMIN PORTAL ==================== */}
+              <div className="bg-[#EDF5FF]/95 backdrop-blur-md rounded-3xl p-6 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-blue-100/90 flex flex-col justify-between text-center transform hover:-translate-y-1.5 transition-all duration-300">
+                <div>
+                  {/* Circular Blue Badge */}
+                  <div className="w-14 h-14 rounded-full bg-[#2563EB] text-white flex items-center justify-center mx-auto shadow-md shadow-[#2563EB]/20">
+                    <Shield className="w-7 h-7" />
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#123B73] mt-4 mb-2 tracking-tight">
+                    Admin Portal
+                  </h2>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 font-normal">
+                    Access the administrative dashboard to review submissions, manage faculty
+                    records, and generate reports.
+                  </p>
+                </div>
+
+                {/* Primary Button */}
+                <div className="pt-2">
+                  <Link href="/admin-login" className="block w-full">
+                    <button className="w-full py-3 px-4 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                      <span>Login as Admin</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </Link>
+                </div>
               </div>
-              <Link href="/admin-login">
-                <Button variant="secondary" className="w-full font-bold">
-                  Admin Sign In <ArrowRight className="w-4 h-4 ml-1.5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} N S Raju Institute of Engineering & Technology (NSRIET). All rights reserved.
+      {/* ============================================================ */}
+      {/* 4. SUBTLE BOTTOM CURVED WAVE ACCENTS */}
+      {/* ============================================================ */}
+      <div className="relative z-10 w-full overflow-hidden leading-none -mb-[1px]">
+        <svg
+          viewBox="0 0 1440 85"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-12 sm:h-16 lg:h-20 preserve-3d"
+        >
+          {/* Subtle back wave */}
+          <path
+            d="M0,30 C320,70 480,10 720,40 C960,70 1200,20 1440,35 L1440,85 L0,85 Z"
+            fill="#60A5FA"
+            fillOpacity="0.25"
+          />
+          {/* Front wave matching footer top */}
+          <path
+            d="M0,45 C280,15 540,65 820,35 C1100,5 1300,55 1440,40 L1440,85 L0,85 Z"
+            fill="#0F274A"
+          />
+        </svg>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 5. DARK NAVY INSTITUTIONAL FOOTER */}
+      {/* ============================================================ */}
+      <footer className="relative z-20 bg-[#0F274A] text-white border-t border-blue-950/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 text-center md:text-left">
+            {/* Left: NSRIET Brand Info */}
+            <div className="flex items-center gap-3">
+              <div className="relative bg-[#123B73] px-3 py-1.5 rounded-lg border border-white/20 flex items-center justify-center">
+                <span className="font-bold text-white text-sm tracking-wider">NSRIET</span>
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-bold text-slate-100 uppercase leading-tight tracking-tight">
+                  N S Raju Institute of
+                </span>
+                <span className="text-[11px] font-semibold text-slate-300 uppercase leading-tight tracking-wider">
+                  Engineering & Technology
+                </span>
+              </div>
+            </div>
+
+            {/* Center Items: Quality Pillars */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-[13px] text-slate-200">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-blue-300 shrink-0" />
+                <span className="font-medium">Empowering Educators</span>
+              </div>
+              <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-500" />
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-blue-300 shrink-0" />
+                <span className="font-medium">Enhancing Quality</span>
+              </div>
+              <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-500" />
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-300 shrink-0" />
+                <span className="font-medium">Building a Better Future</span>
+              </div>
+            </div>
+
+            {/* Right: IQAC Cell Info */}
+            <div className="flex items-center gap-2.5 text-right md:border-l md:border-slate-700/60 md:pl-6">
+              <div className="flex flex-col text-center md:text-right">
+                <span className="text-sm font-extrabold text-white tracking-wider">IQAC</span>
+                <span className="text-[10px] text-slate-300 leading-tight">
+                  Internal Quality <br className="hidden md:inline" /> Assurance Cell
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
