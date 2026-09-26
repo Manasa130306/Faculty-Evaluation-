@@ -1,0 +1,2102 @@
+{
+  "sarFaculty": [
+    {
+      "sno": 1,
+      "sarName": "P. Sateesh Kumar",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 10,
+        "h4": 15,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 62
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 15,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 57
+      }
+    },
+    {
+      "sno": 2,
+      "sarName": "D. Soma Sekhar",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 10,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 37
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 15,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 52
+      }
+    },
+    {
+      "sno": 3,
+      "sarName": "Hema Sundari",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 20
+      }
+    },
+    {
+      "sno": 4,
+      "sarName": "Kala Priya",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 35
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 15,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 35
+      }
+    },
+    {
+      "sno": 5,
+      "sarName": "Jhansi Rani",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 15,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 50
+      }
+    },
+    {
+      "sno": 6,
+      "sarName": "V. Satyavathi",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 15,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 51
+      }
+    },
+    {
+      "sno": 7,
+      "sarName": "G. Siva Kumari",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": null,
+        "h2": null,
+        "h3": null,
+        "h4": null,
+        "h5": null,
+        "h6": null,
+        "h7": null,
+        "h8": null,
+        "total": 0
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": null,
+        "h3": null,
+        "h4": null,
+        "h5": null,
+        "h6": null,
+        "h7": null,
+        "h8": null,
+        "total": 0
+      }
+    },
+    {
+      "sno": 8,
+      "sarName": "P. Kasturi",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 10,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 45
+      }
+    },
+    {
+      "sno": 9,
+      "sarName": "R. K. A. Nageswari",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 13,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 23
+      },
+      "augMarks": {
+        "h1": 13,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 23
+      }
+    },
+    {
+      "sno": 10,
+      "sarName": "U. pradeep Kumar",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 10,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 51
+      }
+    },
+    {
+      "sno": 11,
+      "sarName": "R. Mahesh",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": null,
+        "h2": null,
+        "h3": null,
+        "h4": null,
+        "h5": null,
+        "h6": null,
+        "h7": null,
+        "h8": null,
+        "total": 0
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": null,
+        "h3": null,
+        "h4": null,
+        "h5": null,
+        "h6": null,
+        "h7": null,
+        "h8": null,
+        "total": 0
+      }
+    },
+    {
+      "sno": 12,
+      "sarName": "V. Sindhu Bhargavi",
+      "sarDept": "ECE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 15,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 55
+      }
+    },
+    {
+      "sno": 13,
+      "sarName": "A. Prasada Rao",
+      "sarDept": "EEE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      }
+    },
+    {
+      "sno": 14,
+      "sarName": "R. Srujana sri",
+      "sarDept": "EEE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 10,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 35
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      }
+    },
+    {
+      "sno": 15,
+      "sarName": "P. L. Chandini",
+      "sarDept": "EEE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      }
+    },
+    {
+      "sno": 16,
+      "sarName": "U. Sirisha",
+      "sarDept": "EEE",
+      "julyMarks": {
+        "h1": 14,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 24
+      },
+      "augMarks": {
+        "h1": 14,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 24
+      }
+    },
+    {
+      "sno": 17,
+      "sarName": "R. Anuradha",
+      "sarDept": "EEE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      }
+    },
+    {
+      "sno": 18,
+      "sarName": "Ramanjaneyulu",
+      "sarDept": "MECH",
+      "julyMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 5,
+        "h8": 0,
+        "total": 53
+      },
+      "augMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 10,
+        "total": 68
+      }
+    },
+    {
+      "sno": 19,
+      "sarName": "Dr. Ravi Teja",
+      "sarDept": "MECH",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 5,
+        "h8": 0,
+        "total": 50
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 10,
+        "total": 65
+      }
+    },
+    {
+      "sno": 20,
+      "sarName": "Suresh Babu",
+      "sarDept": "MECH",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 5,
+        "h8": 0,
+        "total": 51
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 10,
+        "total": 66
+      }
+    },
+    {
+      "sno": 21,
+      "sarName": "Padmaja",
+      "sarDept": "MECH",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 5,
+        "h8": 0,
+        "total": 52
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 5,
+        "h4": 8,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 10,
+        "total": 60
+      }
+    },
+    {
+      "sno": 22,
+      "sarName": "Sri Devi",
+      "sarDept": "MECH",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 5,
+        "h8": 0,
+        "total": 52
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 5,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 10,
+        "total": 67
+      }
+    },
+    {
+      "sno": 23,
+      "sarName": "Anhijit",
+      "sarDept": "MBA",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 0,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 41
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 0,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 31
+      }
+    },
+    {
+      "sno": 24,
+      "sarName": "Sowjanya",
+      "sarDept": "MBA",
+      "julyMarks": {
+        "h1": 18,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 18
+      },
+      "augMarks": {
+        "h1": 18,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 28
+      }
+    },
+    {
+      "sno": 25,
+      "sarName": "Srinivas",
+      "sarDept": "MBA",
+      "julyMarks": {
+        "h1": 13,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 13
+      },
+      "augMarks": {
+        "h1": 13,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 13
+      }
+    },
+    {
+      "sno": 26,
+      "sarName": "Adibabu",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 35
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 35
+      }
+    },
+    {
+      "sno": 27,
+      "sarName": "M. Asha",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 51
+      }
+    },
+    {
+      "sno": 28,
+      "sarName": "Uma Maheswara Rao",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      }
+    },
+    {
+      "sno": 29,
+      "sarName": "Deva Raj",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 41
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 36
+      }
+    },
+    {
+      "sno": 30,
+      "sarName": "Venkateswara Rao",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 38
+      },
+      "augMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 38
+      }
+    },
+    {
+      "sno": 31,
+      "sarName": "Diwakar",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 0,
+        "h4": 10,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 48
+      },
+      "augMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 38
+      }
+    },
+    {
+      "sno": 32,
+      "sarName": "Phani Sekhar",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 50
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 35
+      }
+    },
+    {
+      "sno": 33,
+      "sarName": "Sravanti",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 35
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      }
+    },
+    {
+      "sno": 34,
+      "sarName": "Dr. Harihara Santosh",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 5,
+        "h8": 0,
+        "total": 20
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 10,
+        "total": 35
+      }
+    },
+    {
+      "sno": 35,
+      "sarName": "P. Chandra Sekhar",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 15,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 40
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 36
+      }
+    },
+    {
+      "sno": 36,
+      "sarName": "K. Shiva",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 28
+      },
+      "augMarks": {
+        "h1": 18,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 38
+      }
+    },
+    {
+      "sno": 37,
+      "sarName": "M. Sai Jyothi",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 20
+      }
+    },
+    {
+      "sno": 38,
+      "sarName": "P. Unnati Aditya",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      },
+      "augMarks": {
+        "h1": 16,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 26
+      }
+    },
+    {
+      "sno": 39,
+      "sarName": "S. V. Meena",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 37
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 37
+      }
+    },
+    {
+      "sno": 40,
+      "sarName": "I. Siva Santosh",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 15
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 15
+      }
+    },
+    {
+      "sno": 41,
+      "sarName": "Shaik Nagur Vali",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 15
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 35
+      }
+    },
+    {
+      "sno": 42,
+      "sarName": "P. Prashanth",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 27
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 37
+      }
+    },
+    {
+      "sno": 43,
+      "sarName": "Rukmini",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 10,
+        "h8": 0,
+        "total": 20
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      }
+    },
+    {
+      "sno": 44,
+      "sarName": "Pavani",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 15
+      }
+    },
+    {
+      "sno": 45,
+      "sarName": "Prasad",
+      "sarDept": "CSE",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 25
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 35
+      }
+    },
+    {
+      "sno": 46,
+      "sarName": "Nagamani Naidu",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": null,
+        "h2": null,
+        "h3": null,
+        "h4": null,
+        "h5": null,
+        "h6": null,
+        "h7": null,
+        "h8": null,
+        "total": 0
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": null,
+        "h3": null,
+        "h4": null,
+        "h5": null,
+        "h6": null,
+        "h7": null,
+        "h8": null,
+        "total": 0
+      }
+    },
+    {
+      "sno": 47,
+      "sarName": "MMK Raju",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 7,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 5,
+        "h7": 0,
+        "h8": null,
+        "total": 27
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 7,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 32
+      }
+    },
+    {
+      "sno": 48,
+      "sarName": "Neelima",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": 15,
+        "h2": 6,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 21
+      },
+      "augMarks": {
+        "h1": 15,
+        "h2": 6,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 21
+      }
+    },
+    {
+      "sno": 49,
+      "sarName": "Dhana Lakshni",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 0
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 10
+      }
+    },
+    {
+      "sno": 50,
+      "sarName": "Hariprasad",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": 10,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 20
+      },
+      "augMarks": {
+        "h1": 10,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 20
+      }
+    },
+    {
+      "sno": 51,
+      "sarName": "P.V.Ramana",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 17
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 10,
+        "total": 27
+      }
+    },
+    {
+      "sno": 52,
+      "sarName": "Sai Sruthi",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 0
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 0
+      }
+    },
+    {
+      "sno": 53,
+      "sarName": "Y Sharavan",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 10,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 10
+      }
+    },
+    {
+      "sno": 54,
+      "sarName": "Dr. Krishna",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": 17,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 0,
+        "total": 27
+      },
+      "augMarks": {
+        "h1": 17,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 10,
+        "h7": 0,
+        "h8": 10,
+        "total": 37
+      }
+    },
+    {
+      "sno": 55,
+      "sarName": "D. Appa Rao",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 0
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 0
+      }
+    },
+    {
+      "sno": 56,
+      "sarName": "S. Govinda",
+      "sarDept": "Bs&H",
+      "julyMarks": {
+        "h1": null,
+        "h2": 8,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 8
+      },
+      "augMarks": {
+        "h1": null,
+        "h2": 8,
+        "h3": 0,
+        "h4": 0,
+        "h5": 0,
+        "h6": 0,
+        "h7": 0,
+        "h8": 0,
+        "total": 8
+      }
+    }
+  ],
+  "srFaculty": [
+    {
+      "srName": "Mr M SATYANARAYANA",
+      "designation": "ASST. PROF.",
+      "srDept": "MECH",
+      "doj": "19-05-2023",
+      "empId": "23TS030001",
+      "dor": "08-07-2025"
+    },
+    {
+      "srName": "Mr CHELLURU SRINIVAS UDAY ABHIJIT",
+      "designation": "ASST. PROF. (ENGLISH)",
+      "srDept": "BS&H",
+      "doj": "26-05-2023",
+      "empId": "23TS510002",
+      "dor": ""
+    },
+    {
+      "srName": "REGULAVALASA HARI PRASAD",
+      "designation": "ASST. PROF. (MATHEMATICS)",
+      "srDept": "BS&H",
+      "doj": "26-05-2023",
+      "empId": "23TS510003",
+      "dor": ""
+    },
+    {
+      "srName": "Mr GUNTU APPA RAO",
+      "designation": "ASST. PROF. & PD",
+      "srDept": "BS&H",
+      "doj": "26-05-2023",
+      "empId": "23TS510004",
+      "dor": ""
+    },
+    {
+      "srName": "Mr GOTTIMUKKALA SURYANARAYANA RAJU",
+      "designation": "ASST. PROF. (LIBRARIAN)",
+      "srDept": "BS&H",
+      "doj": "30-05-2023",
+      "empId": "23TS510005",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs M BHAVANI",
+      "designation": "ASST. PROF.",
+      "srDept": "BS&H",
+      "doj": "01-06-2023",
+      "empId": "23TS510006",
+      "dor": "29-05-2025"
+    },
+    {
+      "srName": "Dr NAGAMANINAIDU BONNADA",
+      "designation": "ASST. PROF. (CHEMISTRY) & HOD",
+      "srDept": "BS&H",
+      "doj": "01-06-2023",
+      "empId": "23TS510007",
+      "dor": ""
+    },
+    {
+      "srName": "Mr SEKHARA MAHANTHI MADHUSUDANA RAO",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "01-06-2023",
+      "empId": "23TS520008",
+      "dor": ""
+    },
+    {
+      "srName": "Mr SARIKA GOVIND",
+      "designation": "ASST. PROF. (CHEMISTRY)",
+      "srDept": "BS&H",
+      "doj": "03-06-2023",
+      "empId": "23TS510010",
+      "dor": ""
+    },
+    {
+      "srName": "PRAMOD KUMAR NULAKAJODU",
+      "designation": "ASST. PROF. (ASST. LIBRARIAN)",
+      "srDept": "BS&H",
+      "doj": "05-06-2023",
+      "empId": "23TS510011",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs N SOUJANYA",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "05-06-2023",
+      "empId": "23TS520012",
+      "dor": "08-07-2025"
+    },
+    {
+      "srName": "Mrs T LALITHA SIVA JYOTHI",
+      "designation": "ASST. PROF.",
+      "srDept": "BS&H",
+      "doj": "07-06-2023",
+      "empId": "23TS510013",
+      "dor": "08-07-2025"
+    },
+    {
+      "srName": "Mr K BUJJI BABU",
+      "designation": "ASST. PROF.  (ENGLISH)",
+      "srDept": "BS&H",
+      "doj": "26-06-2023",
+      "empId": "23TS510014",
+      "dor": "08-07-2025"
+    },
+    {
+      "srName": "M KRISHNA RAJU MUDUNURU",
+      "designation": "ASST. PROF. (MATHEMATICS)",
+      "srDept": "BS&H",
+      "doj": "01-07-2023",
+      "empId": "23TS510015",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs T SOWJANYA KUMARI",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "30-08-2023",
+      "empId": "23TS050016",
+      "dor": "25-06-2025"
+    },
+    {
+      "srName": "SURI V S LALITHA MADHURI",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "12-09-2023",
+      "empId": "23TS040017",
+      "dor": ""
+    },
+    {
+      "srName": "Mr SURESH BABU TALLAPUDI",
+      "designation": "ASST. PROF.",
+      "srDept": "MECH",
+      "doj": "25-09-2023",
+      "empId": "23TS030018",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs REDDI SUJANA SRI",
+      "designation": "ASST. PROF.",
+      "srDept": "EEE",
+      "doj": "04-10-2023",
+      "empId": "23TS020019",
+      "dor": ""
+    },
+    {
+      "srName": "TARUNI BANDARU",
+      "designation": "ASST. PROF.",
+      "srDept": "CIVIL",
+      "doj": "05-10-2023",
+      "empId": "23TS010020",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs K SWATHI",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "27-10-2023",
+      "empId": "23TS050021",
+      "dor": "01-06-2024"
+    },
+    {
+      "srName": "Mrs NALLI MANI",
+      "designation": "ASST. PROF. (PHYSICS)",
+      "srDept": "BS&H",
+      "doj": "23-11-2023",
+      "empId": "23TS510022",
+      "dor": ""
+    },
+    {
+      "srName": "BEELA RAMANJANEYULU",
+      "designation": "ASSOC. PROF.",
+      "srDept": "MECH",
+      "doj": "27-11-2023",
+      "empId": "23TS030023",
+      "dor": ""
+    },
+    {
+      "srName": "Dr M A KHADAR BABA",
+      "designation": "PROFESSOR & PRINCIPAL",
+      "srDept": "ECE",
+      "doj": "30-11-2023",
+      "empId": "23TS040024",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs PUDIPEDDI  DEVI PRASANTHI",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "01-02-2024",
+      "empId": "24TS520025",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs VEDULA UMA",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "01-02-2024",
+      "empId": "24TS520026",
+      "dor": ""
+    },
+    {
+      "srName": "Mr AKULA PRASADA RAO",
+      "designation": "ASSOC. PROF. & HOD",
+      "srDept": "EEE",
+      "doj": "14-02-2024",
+      "empId": "24TS020027",
+      "dor": ""
+    },
+    {
+      "srName": "TAMMINA HEMA SUNDARI",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "30-05-2024",
+      "empId": "24TS040028",
+      "dor": ""
+    },
+    {
+      "srName": "Mr ADIBABU RIPARAGIRI",
+      "designation": "ASST. PROF. & HOD",
+      "srDept": "CSE",
+      "doj": "03-06-2023",
+      "empId": "23TS050009",
+      "dor": ""
+    },
+    {
+      "srName": "Mr BOKAM GANESH",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "01-06-2024",
+      "empId": "24TS050029",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs AMBATI PAVANI",
+      "designation": "ASST. PROF. (MATHEMATICS)",
+      "srDept": "BS&H",
+      "doj": "07-06-2024",
+      "empId": "24TS510030",
+      "dor": ""
+    },
+    {
+      "srName": "DASARI SOMASEKHAR",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "13-06-2024",
+      "empId": "24TS040031",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs MUDADLA ASHA",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "24-06-2024",
+      "empId": "24TS050032",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs PATTI LAKSHMI CHANDINI",
+      "designation": "ASST. PROF.",
+      "srDept": "EEE",
+      "doj": "01-07-2024",
+      "empId": "24TS020033",
+      "dor": ""
+    },
+    {
+      "srName": "YANDI ANGELINA LIVINGSTON",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "01-07-2024",
+      "empId": "24TS040034",
+      "dor": ""
+    },
+    {
+      "srName": "Mr UMAMAHESWARARAO GOTTAPU",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "18-07-2024",
+      "empId": "24TS050035",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs DANTHUMSETTY NEELIMA",
+      "designation": "ASST. PROF. (MATHEMATICS)",
+      "srDept": "BS&H",
+      "doj": "05-08-2024",
+      "empId": "24TS510036",
+      "dor": ""
+    },
+    {
+      "srName": "Mr DEVARAJU HANUMANTHU",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "19-08-2024",
+      "empId": "24TS050037",
+      "dor": ""
+    },
+    {
+      "srName": "Mr RAYAVARAPU PRAKASH",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "09-09-2024",
+      "empId": "24TS520038",
+      "dor": ""
+    },
+    {
+      "srName": "Mr P LATCHAYYA",
+      "designation": "ASST. PROF.   (PD)",
+      "srDept": "BS&H",
+      "doj": "24-09-2024",
+      "empId": "24TS510039",
+      "dor": "08-07-2025"
+    },
+    {
+      "srName": "KOSTI KALA PRIYA",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "25-11-2024",
+      "empId": "24TS040040",
+      "dor": ""
+    },
+    {
+      "srName": "Dr TANKALA  RAVITEJA",
+      "designation": "ASST. PROF.",
+      "srDept": "MECH",
+      "doj": "28-11-2024",
+      "empId": "24TS030041",
+      "dor": ""
+    },
+    {
+      "srName": "MEDICHERLA VENKATA BALESWARI",
+      "designation": "ASST. PROF.",
+      "srDept": "MECH",
+      "doj": "03-12-2024",
+      "empId": "24TS030042",
+      "dor": "25.04.2026"
+    },
+    {
+      "srName": "Mrs NEELAMSETTI NAVYA",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "04-12-2024",
+      "empId": "24TS520043",
+      "dor": "25.04.2026"
+    },
+    {
+      "srName": "Mrs SHIRISHA UNDRAJAVARAPU",
+      "designation": "ASST. PROF.",
+      "srDept": "EEE",
+      "doj": "06-12-2024",
+      "empId": "24TS020044",
+      "dor": ""
+    },
+    {
+      "srName": "KADIYALA JHANSI RANI",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "09-12-2024",
+      "empId": "24TS040045",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs KORADA DHANALAKSHMI",
+      "designation": "ASST. PROF. (PHYSICS)",
+      "srDept": "BS&H",
+      "doj": "29-05-2025",
+      "empId": "25TS510046",
+      "dor": ""
+    },
+    {
+      "srName": "Mr GORLE VENKATESWARA RAO",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "02-06-2025",
+      "empId": "25TS050047",
+      "dor": ""
+    },
+    {
+      "srName": "Mr SUSARAPU DIVAKAR",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "02-06-2025",
+      "empId": "25TS050048",
+      "dor": ""
+    },
+    {
+      "srName": "Mr KOPPALA KASI VENKATA PHANI SEKHAR",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "02-06-2025",
+      "empId": "25TS050049",
+      "dor": ""
+    },
+    {
+      "srName": "Mr KENGAM TIRUMALA KOTESWARA RAO",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "02-06-2025",
+      "empId": "25TS050050",
+      "dor": ""
+    },
+    {
+      "srName": "VALLY SATYAVATHI",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "06-06-2025",
+      "empId": "25TS040051",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs GORLI SIVA KUMARI",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "18-06-2025",
+      "empId": "25TS040052",
+      "dor": ""
+    },
+    {
+      "srName": "Mr POTUNURU SATEESH KUMAR",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "23-06-2025",
+      "empId": "25TS040053",
+      "dor": ""
+    },
+    {
+      "srName": "Dr PENKI RAVI KUMAR",
+      "designation": "PROF. & HOD",
+      "srDept": "MBA",
+      "doj": "27-06-2025",
+      "empId": "25TS520054",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs KAKARLAPUDI SOUJANYA",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "01-07-2025",
+      "empId": "25TS520055",
+      "dor": ""
+    },
+    {
+      "srName": "Mr A AJAY KUMAR",
+      "designation": "PROF. (ENGLISH)",
+      "srDept": "BS&H",
+      "doj": "11-07-2025",
+      "empId": "25TS510056",
+      "dor": "-10-2025"
+    },
+    {
+      "srName": "Mr SRAVAN KUMAR YALLA",
+      "designation": "ASST. PROF. (ENGLISH)",
+      "srDept": "BS&H",
+      "doj": "16-07-2025",
+      "empId": "25TS510057",
+      "dor": ""
+    },
+    {
+      "srName": "Mr PAIDI LAKSHMI NARAYANA",
+      "designation": "ASST. PROF. (PD)",
+      "srDept": "BS&H",
+      "doj": "19-07-2025",
+      "empId": "25TS510058",
+      "dor": ""
+    },
+    {
+      "srName": "Mr AMARA PRASAD",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "09-09-2025",
+      "empId": "25TS050059",
+      "dor": ""
+    },
+    {
+      "srName": "Mr SATYASEKHAR BALIVADA",
+      "designation": "ASST. PROF.",
+      "srDept": "MBA",
+      "doj": "14-10-2025",
+      "empId": "25TS520060",
+      "dor": ""
+    },
+    {
+      "srName": "Mr MARUPALLI NARAYANA GANGADHAR",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "29-10-2025",
+      "empId": "25TS040061",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs MASA PUSHPALATHA",
+      "designation": "ASST. PROF. (ENGLISH)",
+      "srDept": "BS&H",
+      "doj": "29-10-2025",
+      "empId": "25TS510062",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs CHIPURAPALLI SRAVANTHI",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "31-10-2025",
+      "empId": "25TS050063",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs KOLLURI RUKMINI",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "01-11-2025",
+      "empId": "25TS050064",
+      "dor": ""
+    },
+    {
+      "srName": "Mrs PENTAPALLI KASTURI",
+      "designation": "ASST. PROF.",
+      "srDept": "ECE",
+      "doj": "03-11-2025",
+      "empId": "25TS040065",
+      "dor": ""
+    },
+    {
+      "srName": "PADMAJA ANDAVARAPU",
+      "designation": "ASST. PROF.",
+      "srDept": "MECH",
+      "doj": "19-01-2026",
+      "empId": "26TS030066",
+      "dor": ""
+    },
+    {
+      "srName": "Dr HARIHARA SANTOSH DADI",
+      "designation": "PROFESSOR",
+      "srDept": "CSE",
+      "doj": "05-05-2026",
+      "empId": "26TS050067",
+      "dor": ""
+    },
+    {
+      "srName": "CHANDRASEKHARARAO PAKKI",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "06-05-2026",
+      "empId": "26TS050068",
+      "dor": ""
+    },
+    {
+      "srName": "MULLU SAISRUTHI",
+      "designation": "ASST. PROF. (PHYSICS)",
+      "srDept": "BS&H",
+      "doj": "11-05-2026",
+      "empId": "26TS510069",
+      "dor": ""
+    },
+    {
+      "srName": "KONA SIVA",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "15-05-2026",
+      "empId": "26TS050070",
+      "dor": ""
+    },
+    {
+      "srName": "MELETI SAI JYOTHI",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "15-05-2026",
+      "empId": "26TS050071",
+      "dor": ""
+    },
+    {
+      "srName": "KALDARI SRIDEVI",
+      "designation": "ASST. PROF.",
+      "srDept": "MECH",
+      "doj": "18-05-2026",
+      "empId": "26TS030072",
+      "dor": ""
+    },
+    {
+      "srName": "PASUPULETI UNNATHI ADITHJYA",
+      "designation": "ASST. PROF.",
+      "srDept": "CSE",
+      "doj": "19-05-2026",
+      "empId": "26TS030073",
+      "dor": ""
+    }
+  ]
+}
