@@ -31,12 +31,11 @@ export default function HomePage() {
   }, [user, role, isLoading, router]);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden bg-slate-50 font-sans selection:bg-blue-100 selection:text-[#0F2647]">
+    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden font-sans selection:bg-blue-100 selection:text-[#0F2647]">
       {/* ============================================================ */}
-      {/* 1. HERO BACKGROUND IMAGE WITH POLISHED SUBTLE LIGHT OVERLAY */}
+      {/* 1. HERO BACKGROUND IMAGE — VIBRANT & CLEAR (MATCHING IMAGE 2) */}
       {/* ============================================================ */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Campus Background Image */}
         <Image
           src="/campus_background.jpg"
           alt="NSRIET Campus"
@@ -45,19 +44,13 @@ export default function HomePage() {
           sizes="100vw"
           className="object-cover object-center scale-100"
         />
-
-        {/* Soft light overlay on the left to make hero typography crisp */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent w-full md:w-[70%] lg:w-[55%]" />
-
-        {/* Global ambient tint */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-blue-900/10" />
       </div>
 
       {/* ============================================================ */}
-      {/* 2. TOP FLOATING NAVBAR */}
+      {/* 2. FLOATING TOP NAVBAR (MATCHING IMAGE 2) */}
       {/* ============================================================ */}
       <header className="relative z-30 w-full pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-5 sm:px-8 py-2.5 sm:py-3 shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-slate-100/90 flex items-center justify-between transition-all">
+        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-5 sm:px-8 py-2.5 sm:py-3 shadow-[0_4px_25px_rgba(0,0,0,0.08)] border border-slate-100 flex items-center justify-between transition-all">
           {/* Left Brand Badge */}
           <Link href="/" className="flex items-center gap-3 sm:gap-4 group">
             {/* NSRIET Logo Badge */}
@@ -70,10 +63,10 @@ export default function HomePage() {
             </div>
 
             {/* Vertical Separator */}
-            <div className="h-6 w-[1.5px] bg-slate-300 hidden xs:block" />
+            <div className="h-6 w-[1.5px] bg-slate-300" />
 
             {/* Full College Name */}
-            <div className="hidden xs:flex flex-col text-left">
+            <div className="flex flex-col text-left">
               <span className="text-[11px] sm:text-[13px] font-bold tracking-tight text-[#0F2647] leading-tight uppercase font-sans">
                 N S Raju Institute of
               </span>
@@ -93,19 +86,19 @@ export default function HomePage() {
             </Link>
             <Link
               href="#about"
-              className="text-slate-600 hover:text-[#0F2647] font-medium text-sm transition-colors"
+              className="text-slate-700 hover:text-[#0F2647] font-medium text-sm transition-colors"
             >
               About
             </Link>
             <Link
               href="#framework"
-              className="text-slate-600 hover:text-[#0F2647] font-medium text-sm transition-colors"
+              className="text-slate-700 hover:text-[#0F2647] font-medium text-sm transition-colors"
             >
               Evaluation Framework
             </Link>
             <Link
               href="#contact"
-              className="text-slate-600 hover:text-[#0F2647] font-medium text-sm transition-colors"
+              className="text-slate-700 hover:text-[#0F2647] font-medium text-sm transition-colors"
             >
               Contact
             </Link>
@@ -165,34 +158,34 @@ export default function HomePage() {
           {/* HERO LEFT CONTENT */}
           {/* ---------------------------------------------------- */}
           <div className="lg:col-span-5 xl:col-span-5 flex flex-col justify-center text-left">
-            {/* Small Label with accent line */}
+            {/* IQAC Line */}
             <div className="flex items-center gap-2.5 mb-3">
-              <span className="w-7 h-[2px] bg-[#2563EB]" />
+              <span className="w-8 h-[2px] bg-[#2563EB]" />
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] text-[#0F2647]">
                 INTERNAL QUALITY ASSURANCE CELL (IQAC)
               </span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[48px] font-serif font-bold tracking-tight leading-[1.12] text-[#0F2647]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[48px] font-serif font-bold tracking-tight leading-[1.12] text-[#0F2647] drop-shadow-sm">
               Faculty Evaluation <br />
               <span className="text-[#1D4ED8] font-serif font-bold">Management System</span>
             </h1>
 
             {/* Short Subtext */}
-            <p className="mt-4 sm:mt-5 text-sm sm:text-base text-slate-600 leading-relaxed max-w-lg font-normal">
+            <p className="mt-4 sm:mt-5 text-sm sm:text-base text-slate-700 leading-relaxed max-w-lg font-normal drop-shadow-sm">
               A transparent, structured and technology-driven platform for faculty performance
               evaluation and document management.
             </p>
           </div>
 
           {/* ---------------------------------------------------- */}
-          {/* HERO RIGHT: DUAL PORTAL CARDS (SIDE-BY-SIDE ON DESKTOP) */}
+          {/* HERO RIGHT: DUAL PORTAL CARDS (MATCHING IMAGE 2) */}
           {/* ---------------------------------------------------- */}
           <div className="lg:col-span-7 xl:col-span-7 flex justify-center lg:justify-end">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 w-full max-w-2xl">
               {/* ==================== CARD 1: FACULTY PORTAL ==================== */}
-              <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 sm:p-8 shadow-[0_15px_45px_rgba(0,0,0,0.08)] border border-slate-100/90 flex flex-col justify-between text-center transform hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-[0_15px_45px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col justify-between text-center transform hover:-translate-y-1 transition-all duration-300">
                 <div>
                   {/* Circular Maroon Badge */}
                   <div className="w-16 h-16 rounded-full bg-[#88131B] text-white flex items-center justify-center mx-auto shadow-md shadow-[#88131B]/30 mb-4">
@@ -227,7 +220,7 @@ export default function HomePage() {
                       <div className="w-full border-t border-slate-200" />
                     </div>
                     <div className="relative flex justify-center text-[11px]">
-                      <span className="bg-white/95 px-2.5 text-slate-400 font-medium">
+                      <span className="bg-white px-2.5 text-slate-400 font-medium">
                         New to the system?
                       </span>
                     </div>
@@ -243,7 +236,7 @@ export default function HomePage() {
               </div>
 
               {/* ==================== CARD 2: ADMIN PORTAL ==================== */}
-              <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 sm:p-8 shadow-[0_15px_45px_rgba(0,0,0,0.08)] border border-blue-100/90 flex flex-col justify-between text-center transform hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-[0_15px_45px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col justify-between text-center transform hover:-translate-y-1 transition-all duration-300">
                 <div>
                   {/* Circular Blue Badge */}
                   <div className="w-16 h-16 rounded-full bg-[#1D4ED8] text-white flex items-center justify-center mx-auto shadow-md shadow-[#1D4ED8]/30 mb-4">
@@ -291,13 +284,13 @@ export default function HomePage() {
           <path
             d="M0,40 C360,95 540,15 900,55 C1200,85 1320,30 1440,45 L1440,100 L0,100 Z"
             fill="#38BDF8"
-            fillOpacity="0.35"
+            fillOpacity="0.45"
           />
           {/* Mid translucent blue wave */}
           <path
             d="M0,55 C300,20 600,80 960,45 C1200,20 1350,65 1440,50 L1440,100 L0,100 Z"
             fill="#60A5FA"
-            fillOpacity="0.45"
+            fillOpacity="0.55"
           />
           {/* Front solid dark navy wave connecting into footer */}
           <path
