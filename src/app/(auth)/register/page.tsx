@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -92,20 +93,32 @@ export default function FacultyRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-lg">
+    <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8">
+      {/* Background Campus Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/campus_background.jpg"
+          alt="NSRIET Campus"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg">
         <div className="text-center mb-6">
-          <div className="inline-flex w-12 h-12 rounded-xl bg-blue-700 text-white items-center justify-center shadow-md mb-2">
+          <div className="inline-flex w-12 h-12 rounded-xl bg-blue-700 text-white items-center justify-center shadow-lg mb-2">
             <GraduationCap className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">NSRIET Faculty Registration</h1>
-          <p className="text-xs text-slate-500 font-medium">Create your permanent evaluation profile</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">NSRIET Faculty Registration</h1>
+          <p className="text-xs text-slate-200 font-medium">Create your permanent evaluation profile</p>
         </div>
 
-        <Card className="shadow-lg border-slate-200">
+        <Card className="shadow-2xl border-slate-200/80 bg-white/95 backdrop-blur-md">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl">Register New Faculty</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl text-slate-900">Register New Faculty</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Enter your official academic details. Your Faculty ID is permanent and unique.
             </CardDescription>
           </CardHeader>

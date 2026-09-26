@@ -31,9 +31,9 @@ export default function HomePage() {
   }, [user, role, isLoading, router]);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden bg-slate-50 font-sans selection:bg-blue-100 selection:text-[#123B73]">
+    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden bg-slate-100/90 font-sans selection:bg-blue-100 selection:text-[#123B73]">
       {/* ============================================================ */}
-      {/* 1. HERO BACKGROUND IMAGE WITH REFINED GRADIENT OVERLAYS */}
+      {/* 1. HERO BACKGROUND IMAGE WITH POLISHED GRADIENT OVERLAYS */}
       {/* ============================================================ */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Campus Background Image */}
@@ -43,21 +43,21 @@ export default function HomePage() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center scale-100 transition-transform duration-1000"
+          className="object-cover object-center scale-100"
         />
 
-        {/* Left side subtle white-to-transparent gradient for crisp text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent w-full md:w-[75%] lg:w-[60%]" />
+        {/* Soft light overlay on the left to make hero typography razor sharp */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent w-full md:w-[70%] lg:w-[55%]" />
 
-        {/* Global gentle top-to-bottom atmospheric wash */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-blue-900/10" />
+        {/* Ambient atmospheric top-to-bottom tint */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-blue-900/10" />
       </div>
 
       {/* ============================================================ */}
-      {/* 2. TOP FLOATING NAVBAR */}
+      {/* 2. FLOATING TOP NAVBAR */}
       {/* ============================================================ */}
-      <header className="relative z-30 w-full pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-4 sm:px-8 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100/80 flex items-center justify-between transition-all">
+      <header className="relative z-30 w-full pt-4 sm:pt-5 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-5 sm:px-8 py-2.5 shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-slate-100 flex items-center justify-between transition-all">
           {/* Left Brand Badge */}
           <Link href="/" className="flex items-center gap-3 sm:gap-4 group">
             {/* NSRIET Logo Badge */}
@@ -70,7 +70,7 @@ export default function HomePage() {
             </div>
 
             {/* Vertical Separator */}
-            <div className="h-7 w-[1.5px] bg-slate-300 hidden xs:block" />
+            <div className="h-6 w-[1.5px] bg-slate-300 hidden xs:block" />
 
             {/* Full College Name */}
             <div className="hidden xs:flex flex-col text-left">
@@ -84,7 +84,7 @@ export default function HomePage() {
           </Link>
 
           {/* Right Navigation Menu (Desktop) */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+          <div className="hidden md:flex items-center gap-7 lg:gap-9">
             <Link
               href="/"
               className="text-[#123B73] font-semibold text-sm relative py-1 border-b-2 border-blue-600 transition-colors"
@@ -159,22 +159,22 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* 3. HERO BODY (LEFT TEXT & RIGHT PORTAL CARDS) */}
       {/* ============================================================ */}
-      <main className="relative z-20 flex-1 flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-14">
+      <main className="relative z-20 flex-1 flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full">
           {/* ---------------------------------------------------- */}
           {/* HERO LEFT CONTENT */}
           {/* ---------------------------------------------------- */}
-          <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left">
+          <div className="lg:col-span-5 xl:col-span-5 flex flex-col justify-center text-left">
             {/* Small Label with accent line */}
-            <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
-              <span className="w-6 h-[2px] bg-[#2563EB]" />
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#123B73]/90">
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="w-8 h-[2px] bg-[#2563EB]" />
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#123B73]">
                 INTERNAL QUALITY ASSURANCE CELL (IQAC)
               </span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[50px] font-extrabold tracking-tight leading-[1.12] text-[#123B73]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-extrabold tracking-tight leading-[1.12] text-[#123B73]">
               Faculty Evaluation <br />
               <span className="text-[#2563EB]">Management System</span>
             </h1>
@@ -189,18 +189,18 @@ export default function HomePage() {
           {/* ---------------------------------------------------- */}
           {/* HERO RIGHT: DUAL PORTAL CARDS (SIDE-BY-SIDE ON DESKTOP) */}
           {/* ---------------------------------------------------- */}
-          <div className="lg:col-span-6 xl:col-span-7 flex justify-center lg:justify-end">
+          <div className="lg:col-span-7 xl:col-span-7 flex justify-center lg:justify-end">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 w-full max-w-2xl">
               {/* ==================== CARD 1: FACULTY PORTAL ==================== */}
-              <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-white/80 flex flex-col justify-between text-center transform hover:-translate-y-1.5 transition-all duration-300">
+              <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-white/80 flex flex-col justify-between text-center transform hover:-translate-y-1 transition-all duration-300">
                 <div>
                   {/* Circular Maroon Badge */}
-                  <div className="w-14 h-14 rounded-full bg-[#8B1E1E] text-white flex items-center justify-center mx-auto shadow-md shadow-[#8B1E1E]/20">
+                  <div className="w-14 h-14 rounded-full bg-[#8B1E22] text-white flex items-center justify-center mx-auto shadow-md shadow-[#8B1E22]/25">
                     <GraduationCap className="w-7 h-7" />
                   </div>
 
                   {/* Title */}
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#8B1E1E] mt-4 mb-2 tracking-tight">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#8B1E22] mt-4 mb-2 tracking-tight">
                     Faculty Portal
                   </h2>
 
@@ -215,7 +215,7 @@ export default function HomePage() {
                 <div className="space-y-3">
                   {/* Primary Button */}
                   <Link href="/login" className="block w-full">
-                    <button className="w-full py-3 px-4 rounded-full bg-[#8B1E1E] hover:bg-[#731717] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                    <button className="w-full py-3 px-4 rounded-full bg-[#8B1E22] hover:bg-[#731717] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
                       <span>Login as Faculty</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
@@ -235,7 +235,7 @@ export default function HomePage() {
 
                   {/* Secondary Button */}
                   <Link href="/register" className="block w-full">
-                    <button className="w-full py-2.5 px-4 rounded-full border border-[#8B1E1E] text-[#8B1E1E] hover:bg-[#8B1E1E]/5 font-semibold text-xs sm:text-sm transition-all active:scale-[0.98]">
+                    <button className="w-full py-2.5 px-4 rounded-full border border-[#8B1E22] text-[#8B1E22] hover:bg-[#8B1E22]/5 font-semibold text-xs sm:text-sm transition-all active:scale-[0.98]">
                       Register as Faculty
                     </button>
                   </Link>
@@ -243,10 +243,10 @@ export default function HomePage() {
               </div>
 
               {/* ==================== CARD 2: ADMIN PORTAL ==================== */}
-              <div className="bg-[#EDF5FF]/95 backdrop-blur-md rounded-3xl p-6 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-blue-100/90 flex flex-col justify-between text-center transform hover:-translate-y-1.5 transition-all duration-300">
+              <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-blue-100/90 flex flex-col justify-between text-center transform hover:-translate-y-1 transition-all duration-300">
                 <div>
                   {/* Circular Blue Badge */}
-                  <div className="w-14 h-14 rounded-full bg-[#2563EB] text-white flex items-center justify-center mx-auto shadow-md shadow-[#2563EB]/20">
+                  <div className="w-14 h-14 rounded-full bg-[#2563EB] text-white flex items-center justify-center mx-auto shadow-md shadow-[#2563EB]/25">
                     <Shield className="w-7 h-7" />
                   </div>
 
@@ -278,7 +278,7 @@ export default function HomePage() {
       </main>
 
       {/* ============================================================ */}
-      {/* 4. SUBTLE BOTTOM CURVED WAVE ACCENTS */}
+      {/* 4. CYAN / BLUE BOTTOM WAVE ACCENT */}
       {/* ============================================================ */}
       <div className="relative z-10 w-full overflow-hidden leading-none -mb-[1px]">
         <svg
@@ -287,16 +287,16 @@ export default function HomePage() {
           xmlns="http://www.w3.org/2000/svg"
           className="w-full h-12 sm:h-16 lg:h-20 preserve-3d"
         >
-          {/* Subtle back wave */}
+          {/* Subtle back cyan wave */}
           <path
-            d="M0,30 C320,70 480,10 720,40 C960,70 1200,20 1440,35 L1440,85 L0,85 Z"
-            fill="#60A5FA"
-            fillOpacity="0.25"
+            d="M0,25 C320,65 480,10 720,40 C960,70 1200,20 1440,35 L1440,85 L0,85 Z"
+            fill="#38BDF8"
+            fillOpacity="0.3"
           />
-          {/* Front wave matching footer top */}
+          {/* Front dark navy wave connecting to footer */}
           <path
             d="M0,45 C280,15 540,65 820,35 C1100,5 1300,55 1440,40 L1440,85 L0,85 Z"
-            fill="#0F274A"
+            fill="#0D1E3A"
           />
         </svg>
       </div>
@@ -304,8 +304,8 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* 5. DARK NAVY INSTITUTIONAL FOOTER */}
       {/* ============================================================ */}
-      <footer className="relative z-20 bg-[#0F274A] text-white border-t border-blue-950/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+      <footer className="relative z-20 bg-[#0D1E3A] text-white border-t border-blue-950/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 text-center md:text-left">
             {/* Left: NSRIET Brand Info */}
             <div className="flex items-center gap-3">
@@ -355,3 +355,4 @@ export default function HomePage() {
     </div>
   );
 }
+
