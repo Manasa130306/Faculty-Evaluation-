@@ -97,7 +97,7 @@ export default function FacultyRegisterPage() {
       {/* Background Campus Image with Clear Balanced Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/campus_background.jpg"
+          src="/campus_background.png"
           alt="NSRIET Campus"
           fill
           priority

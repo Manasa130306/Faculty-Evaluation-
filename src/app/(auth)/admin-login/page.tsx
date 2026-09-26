@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
       {/* Background Campus Image with Clear Balanced Overlay (Same as Landing and Faculty Login) */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/campus_background.jpg"
+          src="/campus_background.png"
           alt="NSRIET Campus"
           fill
           priority

@@ -31,30 +31,33 @@ export default function HomePage() {
   }, [user, role, isLoading, router]);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden font-sans selection:bg-blue-100 selection:text-[#0F2647]">
+    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden font-sans selection:bg-blue-100 selection:text-[#0B1D3A]">
       {/* ============================================================ */}
-      {/* 1. HERO BACKGROUND IMAGE — VIBRANT & CLEAR (MATCHING IMAGE 2) */}
+      {/* 1. CLEAN COLLEGE CAMPUS BACKGROUND (REAL PHOTOGRAPH ONLY) */}
       {/* ============================================================ */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
-          src="/campus_background.jpg"
+          src="/campus_background.png"
           alt="NSRIET Campus"
           fill
           priority
           sizes="100vw"
           className="object-cover object-center scale-100"
         />
+
+        {/* Soft subtle localized wash on the left matching Image 2 for text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/35 to-transparent w-full md:w-[60%] lg:w-[48%]" />
       </div>
 
       {/* ============================================================ */}
-      {/* 2. FLOATING TOP NAVBAR (MATCHING IMAGE 2) */}
+      {/* 2. FLOATING TOP NAVBAR */}
       {/* ============================================================ */}
       <header className="relative z-30 w-full pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-5 sm:px-8 py-2.5 sm:py-3 shadow-[0_4px_25px_rgba(0,0,0,0.08)] border border-slate-100 flex items-center justify-between transition-all">
+        <nav className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full px-5 sm:px-8 py-2.5 sm:py-3 shadow-[0_6px_30px_rgba(0,0,0,0.08)] border border-slate-100/90 flex items-center justify-between transition-all">
           {/* Left Brand Badge */}
           <Link href="/" className="flex items-center gap-3 sm:gap-4 group">
             {/* NSRIET Logo Badge */}
-            <div className="relative bg-[#0F2647] px-3.5 py-1.5 rounded-lg flex items-center justify-center shadow-inner group-hover:bg-[#0A1A32] transition-colors">
+            <div className="relative bg-[#0B1D3A] px-3.5 py-1.5 rounded-lg flex items-center justify-center shadow-inner group-hover:bg-[#071428] transition-colors">
               {/* Red Top Accent Bar */}
               <div className="absolute -top-0.5 right-2 w-4 h-1 bg-[#DC2626] rounded-full" />
               <span className="font-extrabold text-white text-base sm:text-lg tracking-wider font-sans">
@@ -67,10 +70,10 @@ export default function HomePage() {
 
             {/* Full College Name */}
             <div className="flex flex-col text-left">
-              <span className="text-[11px] sm:text-[13px] font-bold tracking-tight text-[#0F2647] leading-tight uppercase font-sans">
+              <span className="text-[11px] sm:text-[13px] font-bold tracking-tight text-[#0B1D3A] leading-tight uppercase font-sans">
                 N S Raju Institute of
               </span>
-              <span className="text-[10px] sm:text-[12px] font-semibold tracking-wider text-[#0F2647] leading-tight uppercase font-sans opacity-95">
+              <span className="text-[10px] sm:text-[12px] font-semibold tracking-wider text-[#0B1D3A] leading-tight uppercase font-sans opacity-95">
                 Engineering & Technology
               </span>
             </div>
@@ -80,25 +83,25 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-7 lg:gap-9">
             <Link
               href="/"
-              className="text-[#0F2647] font-semibold text-sm relative py-1 border-b-2 border-blue-600 transition-colors"
+              className="text-[#0B1D3A] font-semibold text-sm relative py-1 border-b-2 border-blue-600 transition-colors"
             >
               Home
             </Link>
             <Link
               href="#about"
-              className="text-slate-700 hover:text-[#0F2647] font-medium text-sm transition-colors"
+              className="text-slate-700 hover:text-[#0B1D3A] font-medium text-sm transition-colors"
             >
               About
             </Link>
             <Link
               href="#framework"
-              className="text-slate-700 hover:text-[#0F2647] font-medium text-sm transition-colors"
+              className="text-slate-700 hover:text-[#0B1D3A] font-medium text-sm transition-colors"
             >
               Evaluation Framework
             </Link>
             <Link
               href="#contact"
-              className="text-slate-700 hover:text-[#0F2647] font-medium text-sm transition-colors"
+              className="text-slate-700 hover:text-[#0B1D3A] font-medium text-sm transition-colors"
             >
               Contact
             </Link>
@@ -107,7 +110,7 @@ export default function HomePage() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-[#0F2647] hover:bg-slate-100 transition"
+            className="md:hidden p-2 rounded-lg text-[#0B1D3A] hover:bg-slate-100 transition"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -120,7 +123,7 @@ export default function HomePage() {
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-[#0F2647] font-semibold text-sm px-3 py-2 rounded-lg bg-blue-50"
+              className="text-[#0B1D3A] font-semibold text-sm px-3 py-2 rounded-lg bg-blue-50"
             >
               Home
             </Link>
@@ -158,29 +161,29 @@ export default function HomePage() {
           {/* HERO LEFT CONTENT */}
           {/* ---------------------------------------------------- */}
           <div className="lg:col-span-5 xl:col-span-5 flex flex-col justify-center text-left">
-            {/* IQAC Line */}
+            {/* Small Label with accent line */}
             <div className="flex items-center gap-2.5 mb-3">
               <span className="w-8 h-[2px] bg-[#2563EB]" />
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] text-[#0F2647]">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] text-[#0B1D3A]">
                 INTERNAL QUALITY ASSURANCE CELL (IQAC)
               </span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[48px] font-serif font-bold tracking-tight leading-[1.12] text-[#0F2647] drop-shadow-sm">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[48px] font-serif font-bold tracking-tight leading-[1.12] text-[#0B1D3A]">
               Faculty Evaluation <br />
               <span className="text-[#1D4ED8] font-serif font-bold">Management System</span>
             </h1>
 
             {/* Short Subtext */}
-            <p className="mt-4 sm:mt-5 text-sm sm:text-base text-slate-700 leading-relaxed max-w-lg font-normal drop-shadow-sm">
+            <p className="mt-4 sm:mt-5 text-sm sm:text-base text-slate-700 leading-relaxed max-w-lg font-normal">
               A transparent, structured and technology-driven platform for faculty performance
               evaluation and document management.
             </p>
           </div>
 
           {/* ---------------------------------------------------- */}
-          {/* HERO RIGHT: DUAL PORTAL CARDS (MATCHING IMAGE 2) */}
+          {/* HERO RIGHT: DUAL PORTAL CARDS (SIDE-BY-SIDE ON DESKTOP) */}
           {/* ---------------------------------------------------- */}
           <div className="lg:col-span-7 xl:col-span-7 flex justify-center lg:justify-end">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 w-full max-w-2xl">
@@ -244,7 +247,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Title */}
-                  <h2 className="text-2xl sm:text-[26px] font-serif font-bold text-[#0F2647] mb-2 tracking-tight">
+                  <h2 className="text-2xl sm:text-[26px] font-serif font-bold text-[#0B1D3A] mb-2 tracking-tight">
                     Admin Portal
                   </h2>
 
@@ -308,7 +311,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 text-center md:text-left">
             {/* Left: NSRIET Brand Info */}
             <div className="flex items-center gap-3">
-              <div className="relative bg-[#0F2647] px-3 py-1.5 rounded-lg border border-white/20 flex items-center justify-center">
+              <div className="relative bg-[#0B1D3A] px-3 py-1.5 rounded-lg border border-white/20 flex items-center justify-center">
                 <span className="font-bold text-white text-sm tracking-wider">NSRIET</span>
               </div>
               <div className="flex flex-col text-left">
@@ -354,5 +357,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-
