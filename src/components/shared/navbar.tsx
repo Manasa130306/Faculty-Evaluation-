@@ -33,6 +33,17 @@ export function Navbar() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSuccessMsg, setProfileSuccessMsg] = useState(false);
+  
+  // Password change state
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,6 +120,38 @@ export function Navbar() {
       console.error('Failed to update profile:', err);
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const { changePasswordAction } = await import('@/app/actions/auth');
+      const result = await changePasswordAction(passwordForm.currentPassword, passwordForm.newPassword);
+      
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      
+      setPasswordSuccess(true);
+      setTimeout(() => {
+        setIsPasswordModalOpen(false);
+        setPasswordSuccess(false);
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }, 1500);
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to change password.');
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -199,6 +242,21 @@ export function Navbar() {
 
                       <button
                         type="button"
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          setIsPasswordModalOpen(true);
+                          setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                          setPasswordError(null);
+                          setPasswordSuccess(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer text-left"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                        Change Password
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer text-left"
                       >
@@ -235,7 +293,6 @@ export function Navbar() {
               </Link>
             </div>
           )}
-        </div>
         </div>
       </header>
 
@@ -343,6 +400,94 @@ export function Navbar() {
                 </>
               ) : (
                 'Save Changes'
+              )}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+
+      {/* Change Password Modal */}
+      <Dialog
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        title="Change Password"
+        description="Securely update your authentication password."
+      >
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          {passwordSuccess && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Password successfully updated!</span>
+            </div>
+          )}
+          
+          {passwordError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-xs font-bold">
+              {passwordError}
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">Current Password</label>
+            <Input
+              type="password"
+              required
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))}
+              placeholder="Enter current password"
+              className="h-10 text-xs"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">New Password</label>
+            <Input
+              type="password"
+              required
+              minLength={6}
+              value={passwordForm.newPassword}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
+              placeholder="Enter new password (min 6 chars)"
+              className="h-10 text-xs"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">Confirm New Password</label>
+            <Input
+              type="password"
+              required
+              minLength={6}
+              value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+              placeholder="Confirm new password"
+              className="h-10 text-xs"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPasswordModalOpen(false)}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={isChangingPassword}
+              className="font-bold cursor-pointer"
+            >
+              {isChangingPassword ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-1" /> Updating...
+                </>
+              ) : (
+                'Change Password'
               )}
             </Button>
           </div>

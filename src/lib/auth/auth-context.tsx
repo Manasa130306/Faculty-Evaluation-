@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Keep admin session cookie synchronized whenever user state changes
+  // Keep session cookies synchronized whenever user state changes
   useEffect(() => {
     if (typeof document !== 'undefined') {
       if (user?.role === 'admin') {
@@ -66,6 +66,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         document.cookie = `nsriet_admin_session=${encodeURIComponent(
           JSON.stringify(adminSessionData)
+        )}; path=/; max-age=604800; SameSite=Lax`;
+      } else if (user?.role === 'faculty' && user.faculty_id) {
+        const facultySessionData = {
+          id: user.id,
+          faculty_id: user.faculty_id.trim().toUpperCase(),
+          role: 'faculty',
+          timestamp: Date.now(),
+        };
+        document.cookie = `nsriet_faculty_session=${encodeURIComponent(
+          JSON.stringify(facultySessionData)
         )}; path=/; max-age=604800; SameSite=Lax`;
       }
     }
@@ -119,8 +129,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name:
               cleanAdminId === 'NSRE01'
                 ? 'Principal / Chief Evaluator'
-                : cleanAdminId === 'ADMIN101'
-                ? 'Administrator (Demo)'
                 : 'System Administrator',
             department: 'Administration',
             designation: cleanAdminId === 'NSRE01' ? 'Chief Administrator' : 'Evaluation Administrator',
@@ -215,6 +223,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     password: string
   ): Promise<{ success: boolean; error?: string }> => {
     const cleanId = facultyId.trim().toUpperCase();
+
+    if (cleanId.startsWith('PENDING') || cleanId.toLowerCase() === 'pending' || cleanId.toLowerCase() === 'id pending') {
+      return {
+        success: false,
+        error: 'Faculty ID is pending permanent assignment. Please contact Administrator.',
+      };
+    }
+
+    // Check active status
+    const existingFaculty = await DataService.getProfileByFacultyId(cleanId);
+    if (existingFaculty && existingFaculty.is_active === false) {
+      return {
+        success: false,
+        error: 'This faculty account is currently inactive.',
+      };
+    }
+
     const email = getFacultyAuthEmail(cleanId);
     const expectedDefaultPass = `${cleanId}@NSRIET`;
     const customPasswords = getCustomPasswords();
@@ -235,6 +260,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (synced.role !== 'faculty') {
               await supabase.auth.signOut();
               return { success: false, error: 'Access denied: Admin credentials cannot be used here.' };
+            }
+            if (synced.is_active === false) {
+              await supabase.auth.signOut();
+              return { success: false, error: 'This faculty account is currently inactive.' };
             }
             setUser(synced);
             localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(synced));
@@ -294,12 +323,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const email = getAdminAuthEmail(cleanId);
 
     // Verify authorized Admin identities & passwords
-    const isMainAdmin = cleanId === 'NSRE01' && (password === 'NSRE@ADMIN' || password === 'admin101' || password === 'admin123' || password === 'admin');
-    const isLegacyAdmin =
-      ['ADMIN', 'ADMIN01', 'ADMIN101', 'PRINCIPAL', 'DEAN'].includes(cleanId) &&
-      ['admin', 'admin101', 'admin123', 'Admin@NSRIET', 'ADMIN01@NSRIET', 'admin@nsriet', 'NSRE@ADMIN'].includes(password.trim());
-
-    const isValidAdmin = isMainAdmin || isLegacyAdmin;
+    const isValidAdmin = cleanId === 'NSRE01' && password === 'NSRE@ADMIN';
 
     if (!isValidAdmin) {
       console.warn('[ADMIN AUTH ERROR] Invalid Admin ID or password');
@@ -510,6 +534,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       if (typeof document !== 'undefined') {
         document.cookie = 'nsriet_admin_session=; path=/; max-age=0; SameSite=Lax';
+        document.cookie = 'nsriet_faculty_session=; path=/; max-age=0; SameSite=Lax';
       }
       setUser(null);
       localStorage.removeItem(AUTH_STORAGE_KEY);

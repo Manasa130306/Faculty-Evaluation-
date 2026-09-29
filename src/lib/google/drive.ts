@@ -1,22 +1,17 @@
 import { google } from 'googleapis';
 import { Readable } from 'stream';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const ROOT_FOLDER_ID =
-  process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || '1Zwrtf8NLZ0kL_kvPhIfKHuT5mJGLx4fG';
+  process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || '1VIriUG5nqV4CTKmwUZCZR4xQWCGpbcc1';
 
 export function isDriveConfigured(): boolean {
   const hasOAuthEnv = !!(
     process.env.GOOGLE_CLIENT_ID &&
-    process.env.GOOGLE_CLIENT_SECRET &&
-    (process.env.GOOGLE_REFRESH_TOKEN || true) // True if OAuth configured (token can also come from DB)
+    process.env.GOOGLE_CLIENT_SECRET
   );
 
-  const hasServiceAccount = !!(
-    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY
-  );
-
-  return hasOAuthEnv || hasServiceAccount;
+  return hasOAuthEnv;
 }
 
 /**
@@ -28,58 +23,42 @@ async function getStoredRefreshToken(): Promise<string | null> {
   }
 
   try {
-    const supabase = await createClient();
-    const { data } = await supabase
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
       .from('system_settings')
       .select('value')
       .eq('key', 'google_drive_refresh_token')
-      .single();
+      .maybeSingle();
 
-    if (data?.value) {
+    if (!error && data?.value) {
       return data.value;
     }
-  } catch {
-    // If table doesn't exist yet or query fails, return null
+  } catch (err) {
+    console.warn('[Google Drive] Failed to retrieve stored refresh token:', err);
   }
 
   return null;
 }
 
 /**
- * Instantiate Google Drive client using OAuth 2.0 user authorization with Service Account fallback.
+ * Instantiate Google Drive client using OAuth 2.0 user authorization (Admin Personal Account).
  */
 export async function getDriveClient() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri =
     process.env.GOOGLE_REDIRECT_URI ||
-    'https://facultymarks.vercel.app/api/auth/google/callback';
+    'https://nsriet.vercel.app/api/auth/google/callback';
 
   const refreshToken = await getStoredRefreshToken();
 
-  // 1. Primary: OAuth 2.0 User Authorization (iqacoffice@nsriet.edu.in)
+  // Primary: OAuth 2.0 User Authorization (Admin Personal Google Account: dhhsantosh@gmail.com)
   if (clientId && clientSecret && refreshToken) {
     const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
     oauth2Client.setCredentials({
       refresh_token: refreshToken,
     });
     return google.drive({ version: 'v3', auth: oauth2Client });
-  }
-
-  // 2. Secondary Fallback: Service Account
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  let privateKey = process.env.GOOGLE_PRIVATE_KEY;
-
-  if (clientEmail && privateKey) {
-    privateKey = privateKey.replace(/\\n/g, '\n');
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: clientEmail,
-        private_key: privateKey,
-      },
-      scopes: ['https://www.googleapis.com/auth/drive'],
-    });
-    return google.drive({ version: 'v3', auth });
   }
 
   throw new Error(
@@ -121,7 +100,7 @@ export async function findOrCreateFolder(name: string, parentId: string): Promis
 
 /**
  * Get or create the standard hierarchy:
- * Root -> Faculty Monthly Appraisal -> [Year] -> [Month] -> References
+ * NSRIET Faculty Evaluation -> [Year] -> [Month]
  */
 export async function getMonthFolder(
   year: number,
@@ -130,7 +109,6 @@ export async function getMonthFolder(
   appraisalFolderId: string;
   yearFolderId: string;
   monthFolderId: string;
-  referencesFolderId: string;
 }> {
   const drive = await getDriveClient();
   const rootId = ROOT_FOLDER_ID;
@@ -144,39 +122,53 @@ export async function getMonthFolder(
       supportsAllDrives: true,
     });
 
-    if (rootMeta.data.name !== 'Faculty Monthly Appraisal') {
-      appraisalFolderId = await findOrCreateFolder('Faculty Monthly Appraisal', rootId);
+    if (rootMeta.data.name !== 'NSRIET Faculty Evaluation' && rootMeta.data.name !== 'Faculty Monthly Appraisal') {
+      appraisalFolderId = await findOrCreateFolder('NSRIET Faculty Evaluation', rootId);
     }
   } catch {
-    appraisalFolderId = await findOrCreateFolder('Faculty Monthly Appraisal', rootId);
+    appraisalFolderId = await findOrCreateFolder('NSRIET Faculty Evaluation', rootId);
   }
 
-  // 1. Year folder (e.g. 2026)
-  const yearFolderId = await findOrCreateFolder(year.toString(), appraisalFolderId);
+  // 1. Academic Year folder (e.g. 2026-27 or 2026)
+  const academicYearName = `${year}-${(year + 1).toString().slice(-2)}`;
+  const yearFolderId = await findOrCreateFolder(academicYearName, appraisalFolderId);
 
   // 2. Month folder (e.g. September)
   const monthFolderId = await findOrCreateFolder(month, yearFolderId);
 
-  // 3. References folder inside Month
-  const referencesFolderId = await findOrCreateFolder('References', monthFolderId);
+  return { appraisalFolderId, yearFolderId, monthFolderId };
+}
 
-  return { appraisalFolderId, yearFolderId, monthFolderId, referencesFolderId };
+/**
+ * Ensure academic month folder exists
+ */
+export async function ensureAcademicMonthFolder(
+  year: number,
+  month: string
+): Promise<{ monthFolderId: string }> {
+  const { monthFolderId } = await getMonthFolder(year, month);
+  return { monthFolderId };
 }
 
 /**
  * Get or create head-specific evidence folder:
- * References -> [FACULTY_ID] -> [H2...H8]
+ * [Month] -> [FACULTY_ID - FACULTY_NAME] -> [H1...H8]
  */
 export async function getFacultyHeadFolder(
   year: number,
   month: string,
   facultyId: string,
-  headNumber: number
+  headNumber: number,
+  facultyName?: string
 ): Promise<string> {
-  const { referencesFolderId } = await getMonthFolder(year, month);
+  const { monthFolderId } = await getMonthFolder(year, month);
+  const cleanId = facultyId.trim().toUpperCase();
+  const cleanName = facultyName ? facultyName.trim().toUpperCase() : cleanId;
+  const folderName = facultyName ? `${cleanId} - ${cleanName}` : cleanId;
+
   const facultyFolderId = await findOrCreateFolder(
-    facultyId.trim().toUpperCase(),
-    referencesFolderId
+    folderName,
+    monthFolderId
   );
   const headFolderId = await findOrCreateFolder(`H${headNumber}`, facultyFolderId);
   return headFolderId;
@@ -279,6 +271,32 @@ export async function updateExcelReportInDrive(
   }
 }
 
+export async function getExcelReportFromDrive(
+  fileName: string,
+  parentId: string
+): Promise<Buffer | null> {
+  const drive = await getDriveClient();
+
+  const res = await drive.files.list({
+    q: `name='${fileName.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed=false`,
+    fields: 'files(id, name)',
+    spaces: 'drive',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+  });
+
+  if (res.data.files && res.data.files.length > 0) {
+    const fileId = res.data.files[0].id!;
+    const fileRes = await drive.files.get(
+      { fileId, alt: 'media', supportsAllDrives: true },
+      { responseType: 'arraybuffer' }
+    );
+    return Buffer.from(fileRes.data as ArrayBuffer);
+  }
+
+  return null;
+}
+
 export async function getDriveFileMetadataAndStream(fileId: string) {
   const drive = await getDriveClient();
 
@@ -298,3 +316,34 @@ export async function getDriveFileMetadataAndStream(fileId: string) {
     stream: res.data,
   };
 }
+
+/**
+ * Long-term Google Drive Archive Preservation:
+ * Ensures files remain permanently in Google Drive while website access is managed separately.
+ * NOTE: Google Drive archives are NEVER deleted when 2-month website access expires.
+ */
+export async function archiveReferenceInDrive(fileId: string): Promise<boolean> {
+  // Verifies that the file exists and is preserved in Google Drive
+  try {
+    const drive = await getDriveClient();
+    const meta = await drive.files.get({
+      fileId,
+      fields: 'id, name, trashed',
+      supportsAllDrives: true,
+    });
+    return !meta.data.trashed;
+  } catch (err) {
+    console.warn(`[Google Drive Archive] Could not verify archive for file ${fileId}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Remove website access for expired references while preserving Drive archives.
+ */
+export async function removeWebsiteReferenceAccess(headMarkId?: string): Promise<{ success: boolean }> {
+  // Website metadata access removal is handled safely on the application/database layer.
+  // Google Drive files remain permanently intact.
+  return { success: true };
+}
+

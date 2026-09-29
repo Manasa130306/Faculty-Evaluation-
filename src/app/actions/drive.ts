@@ -7,6 +7,8 @@ import {
   deleteFileFromDrive,
   updateExcelReportInDrive,
   isDriveConfigured,
+  archiveReferenceInDrive,
+  removeWebsiteReferenceAccess,
 } from '@/lib/google/drive';
 
 const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'];
@@ -14,6 +16,7 @@ const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.
 export async function uploadReferenceFileAction(
   formData: FormData,
   facultyId: string,
+  facultyName: string,
   year: number,
   month: string,
   headNumber: number
@@ -40,11 +43,10 @@ export async function uploadReferenceFileAction(
       };
     }
 
-    const headFolderId = await getFacultyHeadFolder(year, month, facultyId, headNumber);
+    const headFolderId = await getFacultyHeadFolder(year, month, facultyId, headNumber, facultyName);
 
-    // Safe filename e.g. 25TS040053_H2_certificate.pdf
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const safeName = `${facultyId.toUpperCase()}_H${headNumber}_${sanitizedName}`;
+    const sanitizedName = facultyName.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_');
+    const safeName = `${facultyId.toUpperCase()}_${sanitizedName}_H${headNumber}_${month}${ext}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const result = await uploadFileToDrive(
@@ -60,7 +62,7 @@ export async function uploadReferenceFileAction(
       fileUrl: `/api/drive/file/${result.fileId}`,
       fileSize: file.size,
       fileType: file.type || 'application/octet-stream',
-      fileName: file.name,
+      fileName: safeName,
     };
   } catch (err: any) {
     console.error('Drive upload error:', err);
@@ -91,6 +93,16 @@ export async function cleanupReferenceFilesAction(
   }
 }
 
+export async function cleanupExpiredDocumentsAction(retentionDays: number = 60) {
+  try {
+    const result = await removeWebsiteReferenceAccess();
+    return { success: true, deletedCount: 0 };
+  } catch (err: any) {
+    console.error('Drive retention cleanup action error:', err);
+    return { success: false, error: err.message || 'Retention cleanup error' };
+  }
+}
+
 export async function updateMonthlyExcelAction(
   allFaculty: { faculty_id: string; name: string; department: string }[],
   year: number,
@@ -102,17 +114,32 @@ export async function updateMonthlyExcelAction(
       return { success: false, error: 'Google Drive credentials not configured.' };
     }
 
-    const { generateMonthlyWorkbook } = await import('@/lib/excel/export');
-    const workbook = await generateMonthlyWorkbook(allFaculty, year, monthName, evaluations);
-    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
-
     const { monthFolderId } = await getMonthFolder(year, monthName);
-    const fileName = `${monthName}_Faculty_Evaluation.xlsx`;
+    const fileName = `${monthName}_Final_Report.xlsx`;
 
-    await updateExcelReportInDrive(buffer, fileName, monthFolderId);
+    const { getExcelReportFromDrive, updateExcelReportInDrive } = await import('@/lib/google/drive');
+    const existingBuffer = await getExcelReportFromDrive(fileName, monthFolderId);
+
+    let workbook;
+    if (existingBuffer) {
+      const { updateMonthlyWorkbook } = await import('@/lib/excel/export');
+      const faculty = allFaculty[0];
+      const evalKey = `${faculty.faculty_id.toUpperCase()}_${year}_${monthName.toLowerCase()}`;
+      const evalData = evaluations[evalKey];
+      workbook = await updateMonthlyWorkbook(existingBuffer, faculty, year, monthName, evalData);
+    } else {
+      const { generateMonthlyWorkbook } = await import('@/lib/excel/export');
+      workbook = await generateMonthlyWorkbook(allFaculty, year, monthName, evaluations);
+    }
+
+    const newBuffer = Buffer.from(await workbook.xlsx.writeBuffer());
+    await updateExcelReportInDrive(newBuffer, fileName, monthFolderId);
+    
     return { success: true };
   } catch (err: any) {
     console.error('Drive excel update error:', err);
     return { success: false, error: err.message || 'Drive API error' };
   }
 }
+
+

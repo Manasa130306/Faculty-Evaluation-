@@ -177,7 +177,7 @@ function addMonthlySheet(
       hasAnyMark = true;
     }
 
-    const evalStatus = evalData?.status === 'submitted' ? 'Submitted' : evalData ? 'Draft' : 'Not Started';
+    const evalStatus = evalData?.status?.toLowerCase() === 'complete' ? 'Complete' : evalData?.status?.toLowerCase() === 'pending' || evalData?.status?.toLowerCase() === 'submitted' ? 'Pending' : evalData ? 'Draft' : 'Not Started';
 
     const row = worksheet.getRow(rowNum);
     row.height = 20;
@@ -220,6 +220,128 @@ function addMonthlySheet(
   });
 
   return worksheet;
+}
+
+/**
+ * Append or Update a single Faculty row in an existing workbook
+ */
+export async function updateMonthlyWorkbook(
+  existingBuffer: any,
+  faculty: { faculty_id: string; name: string; department: string },
+  year: number,
+  monthName: string,
+  evalData: any
+): Promise<ExcelJS.Workbook> {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(existingBuffer);
+
+  const sheetName = `${monthName} ${year}`;
+  let worksheet = workbook.getWorksheet(sheetName);
+
+  if (!worksheet) {
+    // Fallback if worksheet doesn't exist for some reason, we shouldn't reach here normally
+    worksheet = workbook.addWorksheet(sheetName);
+  }
+
+  const mKey = monthName.toUpperCase();
+  const monthFramework = APPRAISAL_FRAMEWORK[mKey] || APPRAISAL_FRAMEWORK['SEPTEMBER'];
+  
+  const h1Max = monthFramework.heads[1]?.maxMarks || 0;
+  const h2Max = monthFramework.heads[2]?.maxMarks || 0;
+  const h3Max = monthFramework.heads[3]?.maxMarks || 0;
+  const h4Max = monthFramework.heads[4]?.maxMarks || 0;
+  const h5Max = monthFramework.heads[5]?.maxMarks || 0;
+  const h6Max = monthFramework.heads[6]?.maxMarks || 0;
+  const h7Max = monthFramework.heads[7]?.maxMarks || 0;
+  const h8Max = monthFramework.heads[8]?.maxMarks || 0;
+
+  const h1 = evalData?.head_marks?.[1]?.marks;
+  const h2 = evalData?.head_marks?.[2]?.marks;
+  const h3 = evalData?.head_marks?.[3]?.marks;
+  const h4 = evalData?.head_marks?.[4]?.marks;
+  const h5 = evalData?.head_marks?.[5]?.marks;
+  const h6 = evalData?.head_marks?.[6]?.marks;
+  const h7 = evalData?.head_marks?.[7]?.marks;
+  const h8 = evalData?.head_marks?.[8]?.marks;
+
+  let rowTotal = 0;
+  let hasAnyMark = false;
+
+  if (evalData?.head_marks && Object.keys(evalData.head_marks).length > 0) {
+    for (let h = 1; h <= 8; h++) {
+      const val = evalData.head_marks[h]?.marks;
+      if (val !== null && val !== undefined) {
+        rowTotal += Number(val) || 0;
+        hasAnyMark = true;
+      }
+    }
+  } else if (evalData?.total_marks !== null && evalData?.total_marks !== undefined) {
+    rowTotal = Number(evalData.total_marks) || 0;
+    hasAnyMark = true;
+  }
+
+  // The admin sets it to 'Complete' or 'Finalized' depending on logic.
+  // The user says "Complete" in the example output: 26TS040079 | ... | Complete
+  const evalStatus = 'Complete'; 
+
+  // Search for existing row
+  let targetRowNum = -1;
+  const rowCount = worksheet.rowCount;
+  
+  for (let r = 3; r <= rowCount; r++) {
+    const row = worksheet.getRow(r);
+    if (row.getCell(1).value?.toString().trim().toUpperCase() === faculty.faculty_id.trim().toUpperCase()) {
+      targetRowNum = r;
+      break;
+    }
+  }
+
+  if (targetRowNum === -1) {
+    targetRowNum = Math.max(3, rowCount + 1);
+  }
+
+  const row = worksheet.getRow(targetRowNum);
+  row.height = 20;
+
+  row.values = [
+    faculty.faculty_id,
+    faculty.name,
+    faculty.department,
+    h1 !== null && h1 !== undefined ? Number(h1) : (h1Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h2 !== null && h2 !== undefined ? Number(h2) : (h2Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h3 !== null && h3 !== undefined ? Number(h3) : (h3Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h4 !== null && h4 !== undefined ? Number(h4) : (h4Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h5 !== null && h5 !== undefined ? Number(h5) : (h5Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h6 !== null && h6 !== undefined ? Number(h6) : (h6Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h7 !== null && h7 !== undefined ? Number(h7) : (h7Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    h8 !== null && h8 !== undefined ? Number(h8) : (h8Max === 0 ? 0 : (hasAnyMark ? 0 : '')),
+    hasAnyMark ? rowTotal : 0,
+    evalStatus,
+  ];
+
+  row.eachCell((cell, colNumber) => {
+    cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF000000' } };
+    cell.border = THIN_BORDER;
+
+    if (colNumber === 1) {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    } else if (colNumber === 2) {
+      cell.alignment = { horizontal: 'left', vertical: 'middle' };
+    } else if (colNumber === 3) {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    } else if (colNumber === 12) {
+      cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF000000' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    } else if (colNumber === 13) {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    } else {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    }
+  });
+  
+  row.commit();
+
+  return workbook;
 }
 
 /**
@@ -487,7 +609,7 @@ export async function exportFacultyEvaluationsToExcel(
       faculty_id: r.faculty_id,
       year,
       month,
-      status: r.status === 'submitted' ? 'submitted' : 'draft',
+      status: r.status?.toLowerCase() === 'complete' ? 'complete' : r.status?.toLowerCase() === 'pending' || r.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
       submitted_at: r.submitted_at,
       total_marks: r.total_marks,
       head_marks: {

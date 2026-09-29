@@ -22,6 +22,8 @@ const STORAGE_KEYS = {
   MARK_CHANGES: 'nsriet_evaluation_mark_changes_v3',
 };
 
+import { uploadReferenceFileAction } from '@/app/actions/drive';
+
 export const STORAGE_BUCKET_NAME = 'faculty-reference-documents';
 
 function getLocalData<T>(key: string, defaultVal: T): T {
@@ -132,10 +134,18 @@ const PRODUCTION_FACULTY_ID_SET = new Set(
   SERVICE_REGISTER_FACULTY.map((f) => f.faculty_id.toUpperCase())
 );
 
+let cachedFaculty: FacultyRecord[] | null = null;
+let cachedFacultyTime = 0;
+
 export const DataService = {
   // 1. FACULTY MASTER & PROFILES
   async getAllFaculty(): Promise<FacultyRecord[]> {
     initDefaultStorage();
+
+    if (cachedFaculty && Date.now() - cachedFacultyTime < 60000) {
+      return cachedFaculty;
+    }
+
     let facultyList: FacultyRecord[] = [];
 
     if (isSupabaseConfigured()) {
@@ -147,6 +157,9 @@ export const DataService = {
 
         if (!error && data && data.length > 0) {
           facultyList = data as FacultyRecord[];
+          cachedFaculty = facultyList;
+          cachedFacultyTime = Date.now();
+          return facultyList;
         }
       } catch (err) {
         console.warn('Supabase fetch faculty error:', err);
@@ -156,7 +169,9 @@ export const DataService = {
     if (facultyList.length === 0) {
       facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
     }
-
+    
+    cachedFaculty = facultyList;
+    cachedFacultyTime = Date.now();
     return facultyList;
   },
 
@@ -393,6 +408,65 @@ export const DataService = {
     return true;
   },
 
+  async updateFacultyId(oldFacultyId: string, newFacultyId: string): Promise<boolean> {
+    initDefaultStorage();
+    const cleanOld = oldFacultyId.trim().toUpperCase();
+    const cleanNew = newFacultyId.trim().toUpperCase();
+    if (!cleanNew || cleanOld === cleanNew) return false;
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase
+          .from('faculty')
+          .update({ faculty_id: cleanNew, updated_at: new Date().toISOString() })
+          .eq('faculty_id', cleanOld);
+
+        await supabase
+          .from('profiles')
+          .update({ faculty_id: cleanNew, updated_at: new Date().toISOString() })
+          .eq('faculty_id', cleanOld);
+
+        await supabase
+          .from('evaluations')
+          .update({ faculty_id: cleanNew, updated_at: new Date().toISOString() })
+          .eq('faculty_id', cleanOld);
+      } catch (err) {
+        console.warn('Supabase updateFacultyId error:', err);
+      }
+    }
+
+    // Update LocalStorage Master
+    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
+    const updatedMaster = facultyMaster.map((f) => {
+      if (f.faculty_id.toUpperCase() === cleanOld) {
+        return {
+          ...f,
+          faculty_id: cleanNew,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return f;
+    });
+    setLocalData(STORAGE_KEYS.FACULTY_MASTER, updatedMaster);
+
+    // Update Profiles in LocalStorage
+    const profiles = getLocalData<Profile[]>(STORAGE_KEYS.PROFILES, []);
+    const updatedProfiles = profiles.map((p) => {
+      if (p.faculty_id.toUpperCase() === cleanOld) {
+        return {
+          ...p,
+          faculty_id: cleanNew,
+        };
+      }
+      return p;
+    });
+    setLocalData(STORAGE_KEYS.PROFILES, updatedProfiles);
+
+    cachedFaculty = null;
+    cachedFacultyTime = 0;
+    return true;
+  },
+
   async createProfile(profileData: {
     faculty_id: string;
     name: string;
@@ -572,7 +646,7 @@ export const DataService = {
               faculty_id: e.faculty_id,
               year: e.year,
               month: e.month,
-              status: e.status?.toLowerCase() === 'submitted' ? 'submitted' : 'draft',
+              status: e.status?.toLowerCase() === 'complete' ? 'complete' : e.status?.toLowerCase() === 'pending' || e.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
               submitted_at: e.submitted_at,
               total_marks: e.total_marks || 0,
               head_marks: headMarksRecord,
@@ -756,7 +830,7 @@ export const DataService = {
             faculty_id: data.faculty_id,
             year: data.year,
             month: data.month,
-            status: data.status?.toLowerCase() === 'submitted' ? 'submitted' : 'draft',
+            status: data.status?.toLowerCase() === 'complete' ? 'complete' : data.status?.toLowerCase() === 'pending' || data.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
             submitted_at: data.submitted_at,
             total_marks: data.total_marks || 0,
             head_marks: headMarksRecord,
@@ -827,30 +901,24 @@ export const DataService = {
       throw new Error('File size must be 1 MB or less.');
     }
 
-    // 2. Strict file format validation
-    const allowed = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'];
-    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    if (!allowed.includes(ext)) {
-      throw new Error('Allowed file formats: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG.');
-    }
-
     const formData = new FormData();
     formData.append('file', file);
-    const { uploadReferenceFileAction } = await import('@/app/actions/drive');
-    const res = await uploadReferenceFileAction(formData, facultyId, year, month, headNumber);
-    if (res && res.success && res.fileId) {
-      return {
-        file_name: file.name,
-        file_path: res.fileId,
-        file_size: file.size,
-        file_type: file.type || 'application/octet-stream',
-        file_url: `/api/drive/file/${res.fileId}`,
-      };
+
+    const profile = await this.getProfileByFacultyId(facultyId);
+    const facultyName = profile?.name || 'FACULTY';
+
+    const result = await uploadReferenceFileAction(formData, facultyId, facultyName, year, month, headNumber);
+    if (!result.success || !result.fileId) {
+      throw new Error(result.error || 'Failed to store document in Google Drive.');
     }
-    if (res && !res.success && res.error) {
-      throw new Error(res.error);
-    }
-    throw new Error('Failed to upload reference document.');
+
+    return {
+      file_name: result.fileName || file.name,
+      file_path: result.fileId, // Store the Drive File ID in file_path
+      file_size: result.fileSize || file.size,
+      file_type: result.fileType || file.type || 'application/octet-stream',
+      file_url: result.fileUrl || `/api/drive/file/${result.fileId}`,
+    };
   },
 
   async saveHeadMark(
@@ -867,7 +935,8 @@ export const DataService = {
       file_url?: string;
     },
     referenceInfo: string = '',
-    isAdminUpdate: boolean = false
+    isAdminUpdate: boolean = false,
+    skipExcelUpdate: boolean = false
   ): Promise<MonthlyEvaluation> {
     initDefaultStorage();
     const isLocked = await this.isMonthLocked(year, month);
@@ -878,7 +947,7 @@ export const DataService = {
     const cleanId = facultyId.toUpperCase();
     const evaluation = await this.getEvaluation(cleanId, year, month);
 
-    if (!isAdminUpdate && evaluation.status === 'submitted') {
+    if (!isAdminUpdate && evaluation.status === 'pending') {
       throw new Error('This evaluation has already been submitted and cannot be edited.');
     }
 
@@ -940,7 +1009,7 @@ export const DataService = {
               faculty_id: cleanId,
               year,
               month,
-              status: evaluation.status === 'submitted' ? 'Submitted' : 'Draft',
+              status: evaluation.status === 'pending' ? 'Submitted' : 'Draft',
               total_marks: total,
               updated_at: new Date().toISOString(),
             },
@@ -978,11 +1047,8 @@ export const DataService = {
     evals[key] = evaluation;
     setLocalData(STORAGE_KEYS.EVALUATIONS, evals);
 
-    // UPDATE MONTHLY EXCEL REPORT IN DRIVE (Reference documents are retained in Drive for 2 months)
-    try {
-      await this.triggerMonthlyExcelUpdate(year, month);
-    } catch (err) {
-      console.warn('Failed to update Excel report in Drive:', err);
+    if (!skipExcelUpdate) {
+      // Excel update is now deferred to Admin Final Submit
     }
 
     return evaluation;
@@ -1080,12 +1146,7 @@ export const DataService = {
     evals[key] = evaluation;
     setLocalData(STORAGE_KEYS.EVALUATIONS, evals);
 
-    // 4. Update monthly Excel
-    try {
-      await this.triggerMonthlyExcelUpdate(year, month);
-    } catch (err) {
-      console.warn('Failed to update Excel report in Drive:', err);
-    }
+    // Excel update is now deferred to Admin Final Submit
 
     return evaluation;
   },
@@ -1118,11 +1179,25 @@ export const DataService = {
   async triggerMonthlyExcelUpdate(year: number, monthName: string) {
     const activeFaculty = await this.getActiveFacultyForMonth(year, monthName);
     const evalsMap: Record<string, MonthlyEvaluation> = {};
-    for (const f of activeFaculty) {
-      if (f.faculty_id) {
-        evalsMap[this.getEvaluationKey(f.faculty_id, year, monthName)] = await this.getEvaluation(f.faculty_id, year, monthName);
+    
+    try {
+      // Use getAllEvaluationsMap to avoid N+1 queries
+      const allEvalsMap = await this.getAllEvaluationsMap(year);
+      for (const f of activeFaculty) {
+        if (f.faculty_id) {
+          const key = this.getEvaluationKey(f.faculty_id, year, monthName);
+          evalsMap[key] = allEvalsMap[key] || await this.getEvaluation(f.faculty_id, year, monthName);
+        }
+      }
+    } catch (err) {
+      // Fallback to one-by-one if the batch fetch fails
+      for (const f of activeFaculty) {
+        if (f.faculty_id) {
+          evalsMap[this.getEvaluationKey(f.faculty_id, year, monthName)] = await this.getEvaluation(f.faculty_id, year, monthName);
+        }
       }
     }
+    
     const { updateMonthlyExcelAction } = await import('@/app/actions/drive');
     await updateMonthlyExcelAction(activeFaculty, year, monthName, evalsMap);
   },
@@ -1140,7 +1215,7 @@ export const DataService = {
 
     const cleanId = facultyId.toUpperCase();
     const evaluation = await this.getEvaluation(cleanId, year, month);
-    evaluation.status = 'submitted';
+    evaluation.status = 'pending';
     evaluation.submitted_at = new Date().toISOString();
 
     // 1. Persist directly to Supabase via Server Action
@@ -1177,13 +1252,6 @@ export const DataService = {
     evals[key] = evaluation;
     setLocalData(STORAGE_KEYS.EVALUATIONS, evals);
 
-    // Trigger Excel Update
-    try {
-      await this.triggerMonthlyExcelUpdate(year, month);
-    } catch (err) {
-      console.warn('Failed to update Excel report in Drive:', err);
-    }
-
     return evaluation;
   },
 
@@ -1205,7 +1273,7 @@ export const DataService = {
             faculty_id: e.faculty_id,
             year: e.year,
             month: e.month,
-            status: e.status?.toLowerCase() === 'submitted' ? 'submitted' : 'draft',
+            status: e.status?.toLowerCase() === 'complete' ? 'complete' : e.status?.toLowerCase() === 'pending' || e.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
             submitted_at: e.submitted_at,
             total_marks: e.total_marks || 0,
           })) as MonthlyEvaluation[];
@@ -1280,7 +1348,7 @@ export const DataService = {
               faculty_id: e.faculty_id,
               year: e.year,
               month: e.month,
-              status: e.status?.toLowerCase() === 'submitted' ? 'submitted' : 'draft',
+              status: e.status?.toLowerCase() === 'complete' ? 'complete' : e.status?.toLowerCase() === 'pending' || e.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
               submitted_at: e.submitted_at,
               total_marks: e.total_marks || 0,
               head_marks: headMarksRecord,
@@ -1300,7 +1368,7 @@ export const DataService = {
 
       // Check if faculty is active for this month OR has historical evaluation records for this month
       const isActiveForThisMonth = this.isFacultyActiveForMonth(f, year, month);
-      const hasHistoricalData = !!evalData && (evalData.status === 'submitted' || (evalData.total_marks !== null && evalData.total_marks > 0));
+      const hasHistoricalData = !!evalData && (evalData.status === 'pending' || (evalData.total_marks !== null && evalData.total_marks > 0));
 
       if (!isActiveForThisMonth && !hasHistoricalData) {
         continue;
@@ -1363,9 +1431,9 @@ export const DataService = {
   async getDashboardMetrics(year: number, month: string) {
     const summaries = await this.getFacultyEvaluationSummaries(year, month);
     const totalFaculty = summaries.length;
-    const submittedList = summaries.filter((s) => s.status === 'submitted');
+    const submittedList = summaries.filter((s) => s.status === 'pending');
     const submittedCount = submittedList.length;
-    const pendingList = summaries.filter((s) => s.status !== 'submitted');
+    const pendingList = summaries.filter((s) => s.status !== 'pending' && s.status !== 'complete');
     const pendingCount = pendingList.length;
 
     const departmentStats: Record<
@@ -1384,7 +1452,7 @@ export const DataService = {
         };
       }
       departmentStats[s.department].total += 1;
-      if (s.status === 'submitted') {
+      if (s.status === 'pending') {
         departmentStats[s.department].submitted += 1;
         departmentStats[s.department].sumMarks += s.total_marks;
       } else {
@@ -1462,7 +1530,7 @@ export const DataService = {
               faculty_id: e.faculty_id,
               year: e.year,
               month: e.month,
-              status: e.status?.toLowerCase() === 'submitted' ? 'submitted' : 'draft',
+              status: e.status?.toLowerCase() === 'complete' ? 'complete' : e.status?.toLowerCase() === 'pending' || e.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
               submitted_at: e.submitted_at,
               total_marks: e.total_marks || 0,
               head_marks: headMarksRecord,
@@ -1513,7 +1581,7 @@ export const DataService = {
           monthlyScores[m] = calculatedTotal;
           monthlyStatuses[m] = evalData.status || 'draft';
           annualTotal += calculatedTotal;
-          if (evalData.status === 'submitted') {
+          if (evalData.status === 'pending') {
             submittedMonthsCount++;
           }
         } else {
@@ -1588,7 +1656,7 @@ export const DataService = {
               faculty_id: e.faculty_id,
               year: e.year,
               month: e.month,
-              status: e.status?.toLowerCase() === 'submitted' ? 'submitted' : 'draft',
+              status: e.status?.toLowerCase() === 'complete' ? 'complete' : e.status?.toLowerCase() === 'pending' || e.status?.toLowerCase() === 'submitted' ? 'pending' : 'draft',
               submitted_at: e.submitted_at,
               total_marks: e.total_marks || 0,
               head_marks: headMarksRecord,

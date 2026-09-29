@@ -40,6 +40,12 @@ export default function FacultyManagementPage() {
   const [isRemovalModalOpen, setIsRemovalModalOpen] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
+  // Modal State for Assigning / Updating Faculty ID
+  const [selectedFacultyForIdUpdate, setSelectedFacultyForIdUpdate] = useState<FacultyRecord | null>(null);
+  const [isIdUpdateModalOpen, setIsIdUpdateModalOpen] = useState<boolean>(false);
+  const [newFacultyIdInput, setNewFacultyIdInput] = useState<string>('');
+  const [idUpdateError, setIdUpdateError] = useState<string | null>(null);
+
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -63,6 +69,55 @@ export default function FacultyManagementPage() {
   const handleOpenRemovalModal = (faculty: FacultyRecord) => {
     setSelectedFacultyForRemoval(faculty);
     setIsRemovalModalOpen(true);
+  };
+
+  const handleOpenIdUpdateModal = (faculty: FacultyRecord) => {
+    setSelectedFacultyForIdUpdate(faculty);
+    setNewFacultyIdInput(faculty.faculty_id.startsWith('PENDING') ? '' : faculty.faculty_id);
+    setIdUpdateError(null);
+    setIsIdUpdateModalOpen(true);
+  };
+
+  const handleSaveFacultyId = async () => {
+    if (!selectedFacultyForIdUpdate) return;
+    const cleanNewId = newFacultyIdInput.trim().toUpperCase();
+    if (!cleanNewId) {
+      setIdUpdateError('Please enter a valid Faculty ID.');
+      return;
+    }
+    if (cleanNewId.startsWith('PENDING')) {
+      setIdUpdateError('Please enter an official permanent Faculty ID.');
+      return;
+    }
+    // Check if ID is already assigned to another faculty
+    const isDuplicate = facultyList.some(
+      (f) => f.faculty_id.toUpperCase() === cleanNewId && f.faculty_id !== selectedFacultyForIdUpdate.faculty_id
+    );
+    if (isDuplicate) {
+      setIdUpdateError(`Faculty ID ${cleanNewId} is already assigned to another faculty.`);
+      return;
+    }
+
+    setIsProcessing(true);
+    setIdUpdateError(null);
+    try {
+      const success = await DataService.updateFacultyId(
+        selectedFacultyForIdUpdate.faculty_id,
+        cleanNewId
+      );
+      if (success) {
+        setIsIdUpdateModalOpen(false);
+        setSelectedFacultyForIdUpdate(null);
+        await loadData();
+      } else {
+        setIdUpdateError('Failed to update Faculty ID. Please try again.');
+      }
+    } catch (err: any) {
+      console.error('Failed to update faculty ID:', err);
+      setIdUpdateError(err.message || 'Error updating Faculty ID');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleConfirmRemoval = async () => {
@@ -260,6 +315,7 @@ export default function FacultyManagementPage() {
                     ) : (
                       filteredFaculty.map((faculty) => {
                         const isInactive = faculty.is_active === false;
+                        const isPendingId = faculty.faculty_id.startsWith('PENDING') || faculty.faculty_id.toLowerCase() === 'pending';
                         return (
                           <TableRow
                             key={faculty.faculty_id}
@@ -268,7 +324,13 @@ export default function FacultyManagementPage() {
                             }`}
                           >
                             <TableCell className="font-mono font-bold text-blue-700 text-xs">
-                              {faculty.faculty_id}
+                              {isPendingId ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                  ID Pending
+                                </span>
+                              ) : (
+                                faculty.faculty_id
+                              )}
                             </TableCell>
                             <TableCell className="font-semibold text-slate-900 text-xs">
                               {faculty.name}
@@ -296,29 +358,41 @@ export default function FacultyManagementPage() {
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              {isInactive ? (
+                              <div className="flex items-center justify-end gap-1.5">
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   disabled={isProcessing}
-                                  onClick={() => handleReactivateFaculty(faculty.faculty_id)}
-                                  className="text-xs h-7 px-2 text-emerald-700 border-emerald-300 hover:bg-emerald-50 cursor-pointer gap-1"
+                                  onClick={() => handleOpenIdUpdateModal(faculty)}
+                                  className="text-xs h-7 px-2 text-blue-700 border-blue-200 hover:bg-blue-50 cursor-pointer"
+                                  title={isPendingId ? 'Assign Permanent Faculty ID' : 'Edit Faculty ID'}
                                 >
-                                  <RotateCcw className="w-3 h-3" />
-                                  <span>Restore</span>
+                                  <span>{isPendingId ? 'Assign ID' : 'Edit ID'}</span>
                                 </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  disabled={isProcessing}
-                                  onClick={() => handleOpenRemovalModal(faculty)}
-                                  className="text-xs h-7 px-2 text-rose-700 border-rose-200 hover:bg-rose-50 hover:border-rose-300 cursor-pointer gap-1"
-                                >
-                                  <UserMinus className="w-3 h-3" />
-                                  <span>Remove Faculty</span>
-                                </Button>
-                              )}
+                                {isInactive ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isProcessing}
+                                    onClick={() => handleReactivateFaculty(faculty.faculty_id)}
+                                    className="text-xs h-7 px-2 text-emerald-700 border-emerald-300 hover:bg-emerald-50 cursor-pointer gap-1"
+                                  >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span>Restore</span>
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isProcessing}
+                                    onClick={() => handleOpenRemovalModal(faculty)}
+                                    className="text-xs h-7 px-2 text-rose-700 border-rose-200 hover:bg-rose-50 hover:border-rose-300 cursor-pointer gap-1"
+                                  >
+                                    <UserMinus className="w-3 h-3" />
+                                    <span>Remove</span>
+                                  </Button>
+                                )}
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -491,6 +565,80 @@ export default function FacultyManagementPage() {
               className="bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer text-xs"
             >
               {isProcessing ? 'Deactivating...' : 'Confirm Removal'}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* MODAL FOR ASSIGNING / UPDATING PERMANENT FACULTY ID */}
+      <Dialog
+        isOpen={isIdUpdateModalOpen}
+        onClose={() => {
+          if (!isProcessing) {
+            setIsIdUpdateModalOpen(false);
+            setSelectedFacultyForIdUpdate(null);
+          }
+        }}
+        title="Assign / Update Faculty ID"
+        className="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs space-y-1">
+            <p className="font-bold text-blue-950">
+              Faculty: {selectedFacultyForIdUpdate?.name}
+            </p>
+            <p className="text-blue-800">
+              Department: {selectedFacultyForIdUpdate?.department} • {selectedFacultyForIdUpdate?.designation}
+            </p>
+            <p className="text-slate-500 font-mono">
+              Current ID: {selectedFacultyForIdUpdate?.faculty_id.startsWith('PENDING') ? 'ID Pending' : selectedFacultyForIdUpdate?.faculty_id}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 block">
+              Permanent Faculty ID (e.g. 26TS510088):
+            </label>
+            <Input
+              value={newFacultyIdInput}
+              onChange={(e) => setNewFacultyIdInput(e.target.value)}
+              placeholder="Enter official NSRIET Faculty ID..."
+              className="h-10 text-xs font-mono font-bold uppercase"
+              disabled={isProcessing}
+            />
+            <p className="text-[11px] text-slate-500">
+              Updating the Faculty ID will update master records and preserve all evaluation history without duplicate entries.
+            </p>
+          </div>
+
+          {idUpdateError && (
+            <p className="text-xs font-bold text-rose-600 flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              {idUpdateError}
+            </p>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isProcessing}
+              onClick={() => {
+                setIsIdUpdateModalOpen(false);
+                setSelectedFacultyForIdUpdate(null);
+              }}
+              className="cursor-pointer text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={isProcessing}
+              onClick={handleSaveFacultyId}
+              className="bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer text-xs"
+            >
+              {isProcessing ? 'Saving...' : 'Save Faculty ID'}
             </Button>
           </div>
         </div>

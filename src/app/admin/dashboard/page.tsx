@@ -81,9 +81,14 @@ export default function AdminDashboardPage() {
     const loadData = async () => {
       setIsLoading(true);
       try {
+        const driveAuthParam = searchParams.get('drive_auth');
+        const fetchUrl = driveAuthParam === 'success' 
+          ? '/api/auth/google/status?refresh=true' 
+          : '/api/auth/google/status';
+
         const [data, driveRes] = await Promise.all([
           DataService.getDashboardMetrics(selectedYear, selectedMonth),
-          fetch('/api/auth/google/status')
+          fetch(fetchUrl)
             .then((r) => r.json())
             .catch(() => null),
         ]);
@@ -98,7 +103,7 @@ export default function AdminDashboardPage() {
       }
     };
     loadData();
-  }, [selectedYear, selectedMonth]);
+  }, [selectedYear, selectedMonth, searchParams]);
 
   const handleConnectDrive = () => {
     if (typeof document !== 'undefined') {

@@ -112,6 +112,8 @@ export default function MonthRecordsPage() {
 
   // Month lock status for the viewed month
   const [isMonthLocked, setIsMonthLocked] = useState<boolean>(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
 
   // Load Summaries
   const loadSummaries = useCallback(async () => {
@@ -450,7 +452,7 @@ export default function MonthRecordsPage() {
                   </TableRow>
                 ) : (
                   facultyRows.map((row) => {
-                    const isSubmitted = row.status === 'submitted';
+                    const isSubmitted = row.status === 'pending';
                     return (
                       <TableRow key={row.faculty_id} className="hover:bg-slate-50/70 transition-colors">
                         <TableCell className="font-mono text-xs font-bold text-slate-700">
@@ -534,7 +536,7 @@ export default function MonthRecordsPage() {
               <div>
                 <span className="text-slate-500 block">Status:</span>
                 <span className="font-bold text-slate-900 uppercase">
-                  {viewingEval?.status === 'submitted' ? (
+                  {viewingEval?.status === 'pending' ? (
                     <span className="text-emerald-700">Submitted ({viewingEval.submitted_at ? new Date(viewingEval.submitted_at).toLocaleDateString() : 'Yes'})</span>
                   ) : (
                     <span className="text-amber-700">Draft / Pending</span>
@@ -696,8 +698,28 @@ export default function MonthRecordsPage() {
 
                     {/* Reference Document Preview */}
                     {hasWeightage && (headData?.file_name || headData?.file_path) && (() => {
-                      const resolvedUrl = headData?.file_url || (headData?.file_path ? (headData.file_path.startsWith('http') || headData.file_path.startsWith('data:') ? headData.file_path : `/api/drive/file/${headData.file_path}`) : '');
+                      const isExpired = Boolean(
+                        headData?.website_visible_until && new Date(headData.website_visible_until).getTime() < Date.now()
+                      );
+                      const resolvedUrl = !isExpired ? (headData?.file_url || (headData?.file_path ? (headData.file_path.startsWith('http') || headData.file_path.startsWith('data:') ? headData.file_path : (headData.file_path.startsWith('pending/') ? `/api/storage/${headData.file_path}` : `/api/drive/file/${headData.file_path}`)) : '')) : '';
                       const docName = headData?.file_name || 'Evidence Document';
+                      
+                      if (isExpired) {
+                        return (
+                          <div className="mt-2 pt-2 border-t border-slate-100">
+                            <div className="flex items-center justify-between bg-slate-100/90 p-2.5 rounded-lg text-xs border border-slate-200">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                                <span className="font-medium text-slate-600 truncate max-w-xs">{docName}</span>
+                              </div>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                Archived in Google Drive; website preview expired.
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       return (
                         <div className="mt-2 pt-2 border-t border-slate-100 space-y-2">
                           <div className="flex items-center justify-between bg-blue-50/40 p-2 rounded-lg text-xs">
@@ -742,6 +764,19 @@ export default function MonthRecordsPage() {
                               <span className="text-[11px] text-slate-400">Attached</span>
                             )}
                           </div>
+
+                          {/* Aspect-Ratio Preserving Image Preview for Admin */}
+                          {resolvedUrl &&
+                            (headData?.file_type?.startsWith('image/') ||
+                              /\.(jpg|jpeg|png|webp|gif)$/i.test(docName)) && (
+                            <div className="mt-2 p-2 bg-white border border-slate-200 rounded-lg shadow-sm max-h-64 overflow-hidden flex items-center justify-center">
+                              <img
+                                src={resolvedUrl}
+                                alt={docName}
+                                className="max-h-60 max-w-full object-contain rounded"
+                              />
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
@@ -749,6 +784,54 @@ export default function MonthRecordsPage() {
                 );
               })}
             </div>
+
+            {/* ADMIN FINALIZE SUBMISSION */}
+            {viewingEval?.status === 'pending' && (
+              <div className="mt-6 pt-4 border-t border-slate-200">
+                {finalizeError && (
+                  <div className="mb-3 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                    {finalizeError}
+                  </div>
+                )}
+                <Button
+                  onClick={async () => {
+                    if (!viewingFaculty || !viewingEval) return;
+                    setIsFinalizing(true);
+                    setFinalizeError(null);
+                    try {
+                      const { adminFinalizeEvaluationAction } = await import('@/app/actions/evaluation');
+                      const res = await adminFinalizeEvaluationAction(viewingFaculty.faculty_id, selectedYear, selectedMonth);
+                      if (!res.success) throw new Error(res.error || res.message || 'Failed to finalize.');
+                      
+                      // Update local state
+                      setViewingEval((prev) => prev ? { ...prev, status: 'complete' } : null);
+                      setFacultyRows((prev) =>
+                        prev.map((r) =>
+                          r.faculty_id === viewingFaculty.faculty_id
+                            ? { ...r, status: 'complete' }
+                            : r
+                        )
+                      );
+                      
+                      // Excel generation is now handled optimally on the server by adminFinalizeEvaluationAction
+
+                      alert('Evaluation successfully finalized and synced to Google Drive/Excel!');
+                    } catch (err: any) {
+                      setFinalizeError(err.message || 'Finalization failed.');
+                    } finally {
+                      setIsFinalizing(false);
+                    }
+                  }}
+                  disabled={isFinalizing}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isFinalizing ? 'Finalizing...' : 'Finalize & Sync to Google Drive'}
+                </Button>
+                <p className="text-center text-[11px] text-slate-500 mt-2">
+                  This will upload pending documents to Google Drive, generate the Monthly Excel, and mark the evaluation as Finalized.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </Dialog>

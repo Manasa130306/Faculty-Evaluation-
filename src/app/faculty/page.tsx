@@ -107,6 +107,7 @@ export default function FacultyEvaluationPortal() {
         file_type: string;
         file_url: string;
         reference_info: string;
+        pendingFile?: File | null;
       }
     >
   >({
@@ -155,7 +156,7 @@ export default function FacultyEvaluationPortal() {
             file_path: hm?.file_path || '',
             file_size: hm?.file_size || 0,
             file_type: hm?.file_type || '',
-            file_url: hm?.file_url || (hm?.file_path ? `/api/drive/file/${hm.file_path}` : ''),
+            file_url: hm?.file_url || (hm?.file_path ? (hm.file_path.startsWith('http') || hm.file_path.startsWith('data:') ? hm.file_path : (hm.file_path.startsWith('pending/') ? `/api/storage/${hm.file_path}` : `/api/drive/file/${hm.file_path}`)) : ''),
             reference_info: hm?.reference_info || '',
           };
         }
@@ -205,39 +206,37 @@ export default function FacultyEvaluationPortal() {
     }));
   };
 
-  // Handle Document Upload
-  const handleFileUpload = async (headNum: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Document Upload (Defer to Final Submit)
+  const handleFileUpload = (headNum: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
     setFileErrorMsg(null);
-    setIsUploadingFile(true);
-
     try {
-      const uploadedDoc = await DataService.uploadReferenceDocument(
-        user.faculty_id,
-        selectedYear,
-        selectedMonth,
-        headNum,
-        file
-      );
+      if (file.size > 1024 * 1024) {
+        throw new Error('File size must be 1 MB or less.');
+      }
+      const allowed = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'];
+      const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      if (!allowed.includes(ext)) {
+        throw new Error('Allowed file formats: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG.');
+      }
 
       setHeadFormState((prev) => ({
         ...prev,
         [headNum]: {
           ...prev[headNum],
-          file_name: uploadedDoc.file_name,
-          file_path: uploadedDoc.file_path,
-          file_size: uploadedDoc.file_size,
-          file_type: uploadedDoc.file_type,
-          file_url: uploadedDoc.file_url,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type || 'application/octet-stream',
+          file_url: URL.createObjectURL(file), // Generate preview URL immediately
+          pendingFile: file,
         },
       }));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'File upload failed.';
+      const message = err instanceof Error ? err.message : 'Invalid file.';
       setFileErrorMsg(message);
     } finally {
-      setIsUploadingFile(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -254,6 +253,7 @@ export default function FacultyEvaluationPortal() {
         file_size: 0,
         file_type: '',
         file_url: '',
+        pendingFile: null,
       },
     }));
   };
@@ -288,21 +288,52 @@ export default function FacultyEvaluationPortal() {
     setIsSaving(true);
     setErrorMsg(null);
     try {
+      let finalDocInfo = state?.file_name
+        ? {
+            file_name: state.file_name,
+            file_path: state.file_path,
+            file_size: state.file_size,
+            file_type: state.file_type,
+            file_url: state.file_url,
+          }
+        : undefined;
+
+      if (state?.pendingFile) {
+        const uploadedDoc = await DataService.uploadReferenceDocument(
+          user.faculty_id,
+          selectedYear,
+          selectedMonth,
+          headNum,
+          state.pendingFile
+        );
+        finalDocInfo = {
+          file_name: uploadedDoc.file_name,
+          file_path: uploadedDoc.file_path,
+          file_size: uploadedDoc.file_size,
+          file_type: uploadedDoc.file_type,
+          file_url: uploadedDoc.file_url,
+        };
+        // Clear pending file
+        setHeadFormState((prev) => ({
+          ...prev,
+          [headNum]: {
+            ...prev[headNum],
+            ...finalDocInfo,
+            pendingFile: null,
+          }
+        }));
+      }
+
       const updated = await DataService.saveHeadMark(
         user.faculty_id,
         selectedYear,
         selectedMonth,
         headNum,
         marksVal,
-        state?.file_name
-          ? {
-              file_name: state.file_name,
-              file_path: state.file_path,
-              file_size: state.file_size,
-              file_type: state.file_type,
-              file_url: state.file_url,
-            }
-          : undefined
+        finalDocInfo,
+        state?.reference_info,
+        false,
+        true // skipExcelUpdate
       );
       setEvaluation(updated);
 
@@ -359,7 +390,7 @@ export default function FacultyEvaluationPortal() {
         annualEvaluations[`${fid}_${selectedYear}_${m.toLowerCase()}`];
       if (evalItem && evalItem.total_marks) {
         totalEarned += evalItem.total_marks;
-        if (evalItem.status === 'submitted') {
+        if (evalItem.status === 'pending') {
           completedMonthsCount++;
         }
       }
@@ -390,6 +421,78 @@ export default function FacultyEvaluationPortal() {
     setIsSaving(true);
     setErrorMsg(null);
     try {
+      // 0. Validate marks and required references
+      for (let headNum = 2; headNum <= 8; headNum++) {
+        const metric = monthFramework.heads[headNum];
+        if (!metric || metric.maxMarks === 0) continue;
+        const state = headFormState[headNum];
+        
+        const marksVal = state?.marks ? parseFloat(state.marks) : null;
+        if (marksVal !== null && (isNaN(marksVal) || marksVal < 0 || marksVal > metric.maxMarks)) {
+          throw new Error(`Invalid marks for Head ${headNum}. Must be between 0 and ${metric.maxMarks}.`);
+        }
+
+        if (marksVal !== null && marksVal > 0 && metric.requiresDocument) {
+          if (!state.file_name && !state.pendingFile) {
+            throw new Error(`Reference document is required for Head ${headNum} because marks are claimed.`);
+          }
+        }
+      }
+
+      // 1. Upload pending reference documents in parallel to optimize speed
+      const uploadPromises = [];
+      for (let headNum = 2; headNum <= 8; headNum++) {
+        const state = headFormState[headNum];
+        if (state?.pendingFile) {
+          uploadPromises.push(
+            (async () => {
+              const uploadedDoc = await DataService.uploadReferenceDocument(
+                user.faculty_id,
+                selectedYear,
+                selectedMonth,
+                headNum,
+                state.pendingFile!
+              );
+              
+              await DataService.saveHeadMark(
+                user.faculty_id,
+                selectedYear,
+                selectedMonth,
+                headNum,
+                state.marks ? parseFloat(state.marks) : null,
+                {
+                  file_name: uploadedDoc.file_name,
+                  file_path: uploadedDoc.file_path,
+                  file_size: uploadedDoc.file_size,
+                  file_type: uploadedDoc.file_type,
+                  file_url: uploadedDoc.file_url,
+                },
+                state.reference_info,
+                false,
+                true // skipExcelUpdate
+              );
+              
+              setHeadFormState((prev) => ({
+                ...prev,
+                [headNum]: {
+                  ...prev[headNum],
+                  file_name: uploadedDoc.file_name,
+                  file_path: uploadedDoc.file_path,
+                  file_size: uploadedDoc.file_size,
+                  file_type: uploadedDoc.file_type,
+                  file_url: uploadedDoc.file_url,
+                  pendingFile: null,
+                }
+              }));
+            })()
+          );
+        }
+      }
+      if (uploadPromises.length > 0) {
+        await Promise.all(uploadPromises);
+      }
+
+      // 2. Submit evaluation (which generates Excel)
       const submitted = await DataService.submitEvaluation(user.faculty_id, selectedYear, selectedMonth);
       setEvaluation(submitted);
 
@@ -418,7 +521,7 @@ export default function FacultyEvaluationPortal() {
     }
   };
 
-  const isSubmitted = evaluation?.status === 'submitted';
+  const isSubmitted = evaluation?.status === 'pending';
   const isReadOnly = isMonthLocked || isSubmitted;
   const activeMetric = monthFramework.heads[currentStep];
   const isCurrentHeadAdminModified = evaluation?.head_marks?.[currentStep]?.is_admin_modified;
@@ -1399,7 +1502,7 @@ export default function FacultyEvaluationPortal() {
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-xs text-slate-900">{m}</span>
                           <Badge
-                            variant={status === 'submitted' ? 'success' : status === 'draft' ? 'warning' : 'outline'}
+                            variant={status === 'pending' ? 'success' : status === 'draft' ? 'warning' : 'outline'}
                             className="text-[10px] py-0 px-1.5 capitalize"
                           >
                             {status === 'not_started' ? 'Pending' : status}

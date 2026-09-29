@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDriveFileMetadataAndStream, isDriveConfigured } from '@/lib/google/drive';
+import { verifyAdminSession, verifyFacultySession } from '@/lib/auth/admin-session';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function GET(
   request: NextRequest,
@@ -14,12 +16,56 @@ export async function GET(
 
     if (!isDriveConfigured()) {
       return NextResponse.json(
-        { error: 'Google Drive integration is not configured with service credentials.' },
+        { error: 'Google Drive integration is not configured.' },
         { status: 503 }
       );
     }
 
+    // Security Check: Enforce authentication
+    const adminSession = await verifyAdminSession(request);
+    const facultySession = await verifyFacultySession(request);
+
+    if (!adminSession.isValid && !facultySession.isValid) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You must be logged in to view reference documents.' },
+        { status: 401 }
+      );
+    }
+
     const { meta, stream } = await getDriveFileMetadataAndStream(fileId);
+    const fileName = meta.name || 'document';
+
+    // If requester is faculty (and not admin), verify they own this document
+    if (!adminSession.isValid && facultySession.isValid) {
+      const reqFacultyId = facultySession.facultyId?.toUpperCase() || '';
+      const startsWithFacultyId = reqFacultyId && fileName.toUpperCase().startsWith(`${reqFacultyId}_`);
+
+      if (!startsWithFacultyId && reqFacultyId) {
+        let isOwner = false;
+        try {
+          const supabase = createAdminClient();
+          const { data } = await supabase
+            .from('evaluation_heads')
+            .select('evaluation_id, evaluations(faculty_id)')
+            .eq('reference_document_path', fileId)
+            .maybeSingle();
+
+          const docOwnerId = (data as any)?.evaluations?.faculty_id?.toUpperCase();
+          if (docOwnerId && docOwnerId === reqFacultyId) {
+            isOwner = true;
+          }
+        } catch (dbErr) {
+          console.warn('[Drive File Access] DB owner check error:', dbErr);
+        }
+
+        if (!isOwner) {
+          return NextResponse.json(
+            { error: 'Forbidden: You do not have permission to view another faculty member’s documents.' },
+            { status: 403 }
+          );
+        }
+      }
+    }
 
     const headers = new Headers();
     if (meta.mimeType) {
@@ -28,14 +74,13 @@ export async function GET(
       headers.set('Content-Type', 'application/octet-stream');
     }
 
-    const fileName = meta.name || 'document';
     headers.set('Content-Disposition', `inline; filename="${encodeURIComponent(fileName)}"`);
 
     if (meta.size) {
       headers.set('Content-Length', meta.size);
     }
 
-    headers.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    headers.set('Cache-Control', 'private, max-age=3600, stale-while-revalidate=86400');
 
     // Create a Web standard ReadableStream from Node.js stream
     const readable = new ReadableStream({
@@ -65,3 +110,4 @@ export async function GET(
     );
   }
 }
+

@@ -45,7 +45,7 @@ export interface MonthLock {
   locked_by?: string | null;
 }
 
-export type EvaluationStatus = 'draft' | 'submitted';
+export type EvaluationStatus = 'draft' | 'pending' | 'complete';
 
 export interface EvaluationHeadMark {
   id?: string;
@@ -61,6 +61,10 @@ export interface EvaluationHeadMark {
   file_size?: number;
   file_type?: string;
   file_url?: string;
+  drive_file_id?: string;
+  drive_folder_id?: string;
+  uploaded_at?: string;
+  website_visible_until?: string | null;
   reference_info?: string;
   updated_at?: string;
 }

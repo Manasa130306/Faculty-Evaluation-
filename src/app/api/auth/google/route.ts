@@ -22,8 +22,9 @@ export async function GET(request: NextRequest) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri =
-      process.env.GOOGLE_REDIRECT_URI ||
-      'https://facultymarks.vercel.app/api/auth/google/callback';
+      baseUrl.includes('localhost')
+        ? `${baseUrl}/api/auth/google/callback`
+        : (process.env.GOOGLE_REDIRECT_URI || 'https://nsriet.vercel.app/api/auth/google/callback');
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
@@ -46,6 +47,15 @@ export async function GET(request: NextRequest) {
       scope: ['https://www.googleapis.com/auth/drive'],
       state,
       include_granted_scopes: true,
+    });
+
+    const parsedAuthUrl = new URL(authUrl);
+    console.log('[Google OAuth Init Diagnostic]', {
+      runtimeClientId: clientId,
+      runtimeRedirectUri: redirectUri,
+      authUrlClientIdParam: parsedAuthUrl.searchParams.get('client_id'),
+      authUrlRedirectUriParam: parsedAuthUrl.searchParams.get('redirect_uri'),
+      authUrlScopeParam: parsedAuthUrl.searchParams.get('scope'),
     });
 
     // 4. Redirect with secure state cookie

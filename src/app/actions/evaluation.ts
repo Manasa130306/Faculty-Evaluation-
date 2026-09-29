@@ -7,23 +7,18 @@ import { HISTORICAL_EVALUATIONS } from '@/lib/constants/historicalData';
 import { EvaluationMarkChange, MonthlyEvaluation, EvaluationHeadMark } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
-function getDirectClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  if (!url || !serviceKey || url.includes('placeholder')) {
-    return null;
-  }
-  return createSupabaseClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Ensure all 56 authoritative faculty records exist in Supabase database
  */
 export async function ensureFacultySeededAction() {
-  const sb = getDirectClient();
-  if (!sb) return { success: false, message: 'Supabase not configured' };
+  let sb;
+  try {
+    sb = createAdminClient();
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Supabase admin client not configured' };
+  }
 
   try {
     const recordsToInsert = SERVICE_REGISTER_FACULTY.map((f) => ({
@@ -61,9 +56,11 @@ export async function saveHeadMarkAction(
   isAdminUpdate: boolean = false
 ) {
   const cleanId = facultyId.trim().toUpperCase();
-  const sb = getDirectClient();
-  if (!sb) {
-    return { success: false, message: 'Supabase client not available' };
+  let sb;
+  try {
+    sb = createAdminClient();
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Supabase admin client not configured' };
   }
 
   try {
@@ -186,9 +183,11 @@ export async function saveHeadMarkAction(
  */
 export async function submitEvaluationAction(facultyId: string, year: number, month: string) {
   const cleanId = facultyId.trim().toUpperCase();
-  const sb = getDirectClient();
-  if (!sb) {
-    return { success: false, message: 'Supabase client not available' };
+  let sb;
+  try {
+    sb = createAdminClient();
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Supabase admin client not configured' };
   }
 
   try {
@@ -219,7 +218,7 @@ export async function submitEvaluationAction(facultyId: string, year: number, mo
       await sb
         .from('evaluations')
         .update({
-          status: 'Submitted',
+          status: 'Pending',
           submitted_at: now,
           updated_at: now,
         })
@@ -230,7 +229,7 @@ export async function submitEvaluationAction(facultyId: string, year: number, mo
           faculty_id: cleanId,
           year,
           month,
-          status: 'Submitted',
+          status: 'Pending',
           submitted_at: now,
           total_marks: 0,
           updated_at: now,
@@ -265,9 +264,11 @@ export async function adminModifyHeadMarkAction(params: {
 }) {
   const { facultyId, facultyName, year, month, headNumber, revisedMarks, adminId, adminName } = params;
   const cleanId = facultyId.trim().toUpperCase();
-  const sb = getDirectClient();
-  if (!sb) {
-    return { success: false, message: 'Supabase client not available' };
+  let sb;
+  try {
+    sb = createAdminClient();
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Supabase admin client not configured' };
   }
 
   try {
@@ -363,7 +364,7 @@ export async function adminModifyHeadMarkAction(params: {
 
     let calcTotal = 0;
     if (allHeads && allHeads.length > 0) {
-      calcTotal = allHeads.reduce((acc, h) => acc + (Number(h.marks) || 0), 0);
+      calcTotal = allHeads.reduce((acc: number, h: any) => acc + (Number(h.marks) || 0), 0);
     }
 
     await sb
@@ -399,8 +400,12 @@ export async function getEvaluationMarkChangesAction(
   year?: number,
   month?: string
 ): Promise<EvaluationMarkChange[]> {
-  const sb = getDirectClient();
-  if (!sb) return [];
+  let sb;
+  try {
+    sb = createAdminClient();
+  } catch (err: any) {
+    return [];
+  }
 
   try {
     let query = sb.from('evaluation_mark_changes').select('*').order('changed_at', { ascending: false });
@@ -423,4 +428,103 @@ export async function getEvaluationMarkChangesAction(
     console.warn('getEvaluationMarkChangesAction error:', err);
   }
   return [];
+}
+
+/**
+ * Finalize evaluation (Admin action)
+ * Uploads all Supabase Storage files to Google Drive, updates DB, sets status to finalized
+ */
+export async function adminFinalizeEvaluationAction(facultyId: string, year: number, month: string) {
+  const cleanId = facultyId.trim().toUpperCase();
+  
+  try {
+    const { verifyAdminServerAction } = await import('@/lib/auth/admin-session');
+    const adminSession = await verifyAdminServerAction();
+    
+    if (!adminSession.isValid || adminSession.role !== 'admin') {
+      return { success: false, message: 'Unauthorized. Please login as Admin.' };
+    }
+    
+    let sb;
+    try {
+      sb = createAdminClient();
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Supabase admin client not configured' };
+    }
+
+    // 3. Fetch evaluation
+    const { data: evalData } = await sb
+      .from('evaluations')
+      .select('id, status, evaluation_heads(*)')
+      .eq('faculty_id', cleanId)
+      .eq('year', year)
+      .ilike('month', month)
+      .maybeSingle();
+
+    if (!evalData) {
+      return { success: false, message: 'Evaluation not found.' };
+    }
+
+    // 4. Update status to Submitted
+    const now = new Date().toISOString();
+    const { error: updateError } = await sb
+      .from('evaluations')
+      .update({
+        status: 'Complete',
+        updated_at: now,
+      })
+      .eq('id', evalData.id);
+
+    if (updateError) {
+      throw new Error(`Failed to update evaluation status: ${updateError.message}`);
+    }
+
+    // 5. Fetch just this faculty's details and trigger Excel update
+    const { data: facultyInfo } = await sb.from('profiles').select('faculty_id, name, department').eq('faculty_id', cleanId).maybeSingle();
+    const { data: latestEval } = await sb
+      .from('evaluations')
+      .select('*, evaluation_heads(*)')
+      .eq('id', evalData.id)
+      .maybeSingle();
+
+    if (facultyInfo && latestEval) {
+      const headMarksRecord: any = {};
+      if (Array.isArray(latestEval.evaluation_heads)) {
+        latestEval.evaluation_heads.forEach((hm: any) => {
+          headMarksRecord[hm.head_number] = hm;
+        });
+      }
+      
+      const singleEvalData = {
+        id: latestEval.id,
+        faculty_id: latestEval.faculty_id,
+        year: latestEval.year,
+        month: latestEval.month,
+        status: latestEval.status?.toLowerCase() === 'complete' ? 'Complete' : latestEval.status,
+        submitted_at: latestEval.submitted_at,
+        total_marks: latestEval.total_marks || 0,
+        head_marks: headMarksRecord,
+      };
+
+      const { updateMonthlyExcelAction } = await import('./drive');
+      const excelRes = await updateMonthlyExcelAction(
+        [facultyInfo],
+        year,
+        month,
+        { [`${facultyInfo.faculty_id.toUpperCase()}_${year}_${month.toLowerCase()}`]: singleEvalData }
+      );
+      if (!excelRes.success) {
+        throw new Error(`Failed to update Excel: ${excelRes.error}`);
+      }
+    }
+
+    revalidatePath('/faculty');
+    revalidatePath('/admin/month-records');
+    revalidatePath('/admin/dashboard');
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('adminFinalizeEvaluationAction error:', err);
+    return { success: false, error: err.message };
+  }
 }
