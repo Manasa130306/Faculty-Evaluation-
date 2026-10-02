@@ -78,6 +78,7 @@ export default function AdminDashboardPage() {
   }, [searchParams]);
 
   useEffect(() => {
+    if (!user) return; // Wait for authentication
     const loadData = async () => {
       setIsLoading(true);
       try {
@@ -103,7 +104,7 @@ export default function AdminDashboardPage() {
       }
     };
     loadData();
-  }, [selectedYear, selectedMonth, searchParams]);
+  }, [selectedYear, selectedMonth, searchParams, user]);
 
   const handleConnectDrive = () => {
     if (typeof document !== 'undefined') {

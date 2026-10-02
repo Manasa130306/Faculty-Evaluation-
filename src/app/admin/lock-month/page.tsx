@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Lock, Unlock, ShieldAlert, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { updateMonthlyExcelAction } from '@/app/actions/drive';
 
 export default function LockMonthPage() {
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_DEFAULT_YEAR);
@@ -41,9 +42,28 @@ export default function LockMonthPage() {
     setActionMessage(null);
     try {
       await DataService.toggleMonthLock(year, month, targetLockState);
+      
+      let driveMsg = '';
+      if (targetLockState) {
+        // Automatically generate Excel report when month is locked
+        try {
+          const allFaculty = await DataService.getAllFaculty();
+          const evals = await DataService.getAllEvaluationsMap(year);
+          const result = await updateMonthlyExcelAction(allFaculty, year, month, evals);
+          if (result.success) {
+            driveMsg = '\n✓ Excel archived to Google Drive.';
+          } else {
+            driveMsg = '\n✕ Google Drive upload failed.';
+          }
+        } catch (e) {
+          console.error(e);
+          driveMsg = '\n✕ Google Drive upload failed.';
+        }
+      }
+
       setActionMessage({
         type: 'success',
-        text: `Successfully ${targetLockState ? 'locked' : 'unlocked'} evaluation records for ${month} ${year}.`,
+        text: `Successfully ${targetLockState ? 'locked' : 'unlocked'} evaluation records for ${month} ${year}.${driveMsg}`,
       });
       await loadLocks();
     } catch (err: any) {

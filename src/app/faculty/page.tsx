@@ -77,6 +77,7 @@ export default function FacultyEvaluationPortal() {
   const [isUploadingFile, setIsUploadingFile] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [fileErrorMsg, setFileErrorMsg] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Success Modal
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
@@ -337,14 +338,21 @@ export default function FacultyEvaluationPortal() {
       );
       setEvaluation(updated);
 
-      // Refresh annual cache
-      const allAnnual = await DataService.getFacultyAnnualEvaluations(user.faculty_id, selectedYear);
-      setAnnualEvaluations(allAnnual);
+      // Optimistically update the annual cache locally instead of blocking to refetch
+      setAnnualEvaluations((prev) => {
+        const key = DataService.getEvaluationKey(user.faculty_id, selectedYear, selectedMonth);
+        const existing = prev[key] || {};
+        return {
+          ...prev,
+          [key]: { ...existing, total_marks: updated.total_marks }
+        };
+      });
 
       return true;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save evaluation.';
       setErrorMsg(message);
+      setToastMessage({ type: 'error', text: '✕ Google Drive upload failed' });
       return false;
     } finally {
       setIsSaving(false);
@@ -355,6 +363,8 @@ export default function FacultyEvaluationPortal() {
   const handleNextStep = async () => {
     const success = await saveCurrentHead(currentStep);
     if (success) {
+      setToastMessage({ type: 'success', text: '✓ Document saved successfully' });
+      setTimeout(() => setToastMessage(null), 3000);
       setCurrentStep((prev) => Math.min(prev + 1, 9));
     }
   };
@@ -1027,6 +1037,33 @@ export default function FacultyEvaluationPortal() {
                 </CardHeader>
 
                 <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                  {toastMessage && (
+                    <div
+                      className={`p-4 rounded-xl flex items-start gap-3 border ${
+                        toastMessage.type === 'success'
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                          : 'bg-rose-50 border-rose-200 text-rose-800'
+                      }`}
+                    >
+                      {toastMessage.type === 'success' ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
+                      )}
+                      <div className="flex-1 text-sm font-bold">{toastMessage.text}</div>
+                      <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {errorMsg && (
+                    <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800">
+                      <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
+                      <div className="flex-1 text-sm font-semibold">{errorMsg}</div>
+                    </div>
+                  )}
+
                   {/* ADMIN MODIFICATION NOTIFICATION BANNER (Part 6) */}
                   {isCurrentHeadAdminModified && evaluation?.head_marks?.[currentStep] && (
                     <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 space-y-2">
@@ -1251,7 +1288,7 @@ export default function FacultyEvaluationPortal() {
                       disabled={isSaving}
                       className="cursor-pointer font-bold"
                     >
-                      {currentStep === 8 ? 'Proceed to Preview' : 'Save & Next'}
+                      {isSaving ? 'Saving...' : currentStep === 8 ? 'Proceed to Preview' : 'Save & Next'}
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>

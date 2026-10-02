@@ -1,0 +1,602 @@
+[
+  {
+    "id": "275d2d8d-4d8b-41ac-8c60-51e02faf978a",
+    "faculty_id": "26TS02009",
+    "name": "SWAMY NAIDU",
+    "designation": "ASST. PROF.",
+    "department": "EEE",
+    "user_id": null,
+    "created_at": "2026-09-30T08:01:25.728065+00:00",
+    "updated_at": "2026-09-30T09:09:45.005+00:00"
+  },
+  {
+    "id": "7ed66656-7cb2-4e6b-a20f-78aa9af44103",
+    "faculty_id": "23TS510002",
+    "name": "CHELLURU SRINIVAS UDAY ABHIJIT",
+    "designation": "ASST. PROF. (ENGLISH)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-27T19:18:13.929723+00:00",
+    "updated_at": "2026-09-30T09:09:38.948+00:00"
+  },
+  {
+    "id": "160034a5-7634-48d0-8a5e-77c5a9482780",
+    "faculty_id": "23TS520012",
+    "name": "N. SOWJANYA",
+    "designation": "ASST. PROF.",
+    "department": "MBA",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:39.785415+00:00",
+    "updated_at": "2026-09-30T09:09:39.785415+00:00"
+  },
+  {
+    "id": "5e7f5b63-01be-4cff-8777-b1f33f27e794",
+    "faculty_id": "25TS520055",
+    "name": "Mrs KAKARLAPUDI SOUJANYA",
+    "designation": "ASST. PROF.",
+    "department": "MBA",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:30.817488+00:00",
+    "updated_at": "2026-09-30T09:09:39.461+00:00"
+  },
+  {
+    "id": "0f1d9b29-68d0-49b1-be6b-36eb58119cdc",
+    "faculty_id": "26TS520088",
+    "name": "GOLAGANI SRINU",
+    "designation": "ASST. PROF.",
+    "department": "MBA",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:30.152043+00:00",
+    "updated_at": "2026-09-30T09:09:39.659+00:00"
+  },
+  {
+    "id": "b7f4a5f5-e555-4710-8d1f-05c17a0012ed",
+    "faculty_id": "26TS520087",
+    "name": "ENDREDDI YERRAYYA REDDY",
+    "designation": "ASST. PROF.",
+    "department": "MBA",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:29.962697+00:00",
+    "updated_at": "2026-09-30T09:09:39.849+00:00"
+  },
+  {
+    "id": "92e18b76-6a5a-4bc5-858e-f5ebe50be722",
+    "faculty_id": "23TS520008",
+    "name": "SEKHARA MAHANTHI MADHUSUDANA RAO",
+    "designation": "ASST. PROF.",
+    "department": "MBA",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:40.55328+00:00",
+    "updated_at": "2026-09-30T09:09:40.55328+00:00"
+  },
+  {
+    "id": "083e1f6f-5bc2-41a7-bd04-d121d3425539",
+    "faculty_id": "23TS050009",
+    "name": "ADIBABU RIPARAGIRI",
+    "designation": "ASST. PROF. & HOD",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:40.758039+00:00",
+    "updated_at": "2026-09-30T09:09:40.758039+00:00"
+  },
+  {
+    "id": "dfba696a-d1e2-438b-88d6-89b67d86daf1",
+    "faculty_id": "24TS050032",
+    "name": "MUDADLA ASHA",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:40.949506+00:00",
+    "updated_at": "2026-09-30T09:09:40.949506+00:00"
+  },
+  {
+    "id": "05433f47-dc4d-4964-bbef-3f7582c0ba7e",
+    "faculty_id": "24TS050035",
+    "name": "UMAMAHESWARARAO GOTTAPU",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:41.137019+00:00",
+    "updated_at": "2026-09-30T09:09:41.137019+00:00"
+  },
+  {
+    "id": "6eca6590-399d-4120-a780-5daebf380ede",
+    "faculty_id": "24TS050037",
+    "name": "DEVARAJU HANUMANTHU",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:41.334404+00:00",
+    "updated_at": "2026-09-30T09:09:41.334404+00:00"
+  },
+  {
+    "id": "f69a9658-f1a5-41af-8783-521f4d098650",
+    "faculty_id": "25TS050047",
+    "name": "GORLE VENKATESWARA RAO",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:41.529048+00:00",
+    "updated_at": "2026-09-30T09:09:41.529048+00:00"
+  },
+  {
+    "id": "685e7277-a707-4535-b859-be927bbdba19",
+    "faculty_id": "25TS050048",
+    "name": "SUSARAPU DIVAKAR",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:41.708082+00:00",
+    "updated_at": "2026-09-30T09:09:41.708082+00:00"
+  },
+  {
+    "id": "6c73d3a3-0711-4747-b12c-f4f5fb0f9a25",
+    "faculty_id": "25TS050049",
+    "name": "KOPPALA KASI VENKATA PHANI SEKHAR",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:41.90644+00:00",
+    "updated_at": "2026-09-30T09:09:41.90644+00:00"
+  },
+  {
+    "id": "42600163-5951-420f-815d-410d3662683e",
+    "faculty_id": "25TS050063",
+    "name": "CHIPURAPALLI SRAVANTHI",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:42.095891+00:00",
+    "updated_at": "2026-09-30T09:09:42.095891+00:00"
+  },
+  {
+    "id": "a00768ff-1ee5-4caf-8ab6-cf92f93b2e64",
+    "faculty_id": "26TS050067",
+    "name": "DR HARIHARA SANTOSH DADI",
+    "designation": "PROFESSOR",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T08:51:32.931594+00:00",
+    "updated_at": "2026-09-30T09:09:41.778+00:00"
+  },
+  {
+    "id": "17289a39-ae79-4f04-9ec5-34a8bb76c126",
+    "faculty_id": "26TS050068",
+    "name": "CHANDRASEKHARARAO PAKKI",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:42.468364+00:00",
+    "updated_at": "2026-09-30T09:09:42.468364+00:00"
+  },
+  {
+    "id": "eabc77e9-9d36-41f4-813e-3105f25eb046",
+    "faculty_id": "26TS050070",
+    "name": "KONA SIVA",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:42.657901+00:00",
+    "updated_at": "2026-09-30T09:09:42.657901+00:00"
+  },
+  {
+    "id": "e6521e7f-ba4f-4fd0-8526-31176e005fcd",
+    "faculty_id": "26TS510086",
+    "name": "VENKATA RAMANA PUSARLA",
+    "designation": "ASST. PROF.",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:29.766488+00:00",
+    "updated_at": "2026-09-30T09:09:45.209+00:00"
+  },
+  {
+    "id": "20b6629c-6bfc-420d-bd39-21eed96a95d1",
+    "faculty_id": "26TS050071",
+    "name": "MELETI SAI JYOTHI",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:42.849457+00:00",
+    "updated_at": "2026-09-30T09:09:42.849457+00:00"
+  },
+  {
+    "id": "3cfe0aa9-d6b6-4d0a-8b6d-0fea26ee1427",
+    "faculty_id": "26TS030073",
+    "name": "PASUPULETI UNNATHI ADITHJYA",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:43.051174+00:00",
+    "updated_at": "2026-09-30T09:09:43.051174+00:00"
+  },
+  {
+    "id": "0d71ea78-b8e6-421a-bdf5-a0a6464d1a5b",
+    "faculty_id": "26TS050074",
+    "name": "SIMHADRI VENKATA MEENA",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:30.572172+00:00",
+    "updated_at": "2026-09-30T09:09:42.726+00:00"
+  },
+  {
+    "id": "e7b8b9c4-f3da-4ae7-b363-e5ccb6cf9c35",
+    "faculty_id": "26TS510085",
+    "name": "SHAIK NAGUR VALI",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:31.015409+00:00",
+    "updated_at": "2026-09-30T09:09:42.913+00:00"
+  },
+  {
+    "id": "f9af66e9-cde8-45ff-90f5-3ee36239a8c7",
+    "faculty_id": "24PC05L002",
+    "name": "PRASHANTH",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-28T06:04:45.397376+00:00",
+    "updated_at": "2026-09-30T09:09:43.1+00:00"
+  },
+  {
+    "id": "a8e2f705-f6ef-4cba-93e2-6436d5d369e2",
+    "faculty_id": "25TS050064",
+    "name": "KOLLURI RUKMINI",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:43.791222+00:00",
+    "updated_at": "2026-09-30T09:09:43.791222+00:00"
+  },
+  {
+    "id": "22130cb5-3185-4977-b62d-b79152fff0b5",
+    "faculty_id": "24TS510030",
+    "name": "AMBATI PAVANI",
+    "designation": "ASST. PROF. (MATHEMATICS)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:43.984521+00:00",
+    "updated_at": "2026-09-30T09:09:43.984521+00:00"
+  },
+  {
+    "id": "07ca3ce7-e7ef-4222-b6c7-5bb40495f6b5",
+    "faculty_id": "25TS050059",
+    "name": "AMARA PRASAD",
+    "designation": "ASST. PROF.",
+    "department": "CSE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:44.166635+00:00",
+    "updated_at": "2026-09-30T09:09:44.166635+00:00"
+  },
+  {
+    "id": "e2a4c0a7-a7f1-41fb-a5ca-465d118f0a03",
+    "faculty_id": "23TS510007",
+    "name": "DR NAGAMANINAIDU BONNADA",
+    "designation": "ASST. PROF. (CHEMISTRY) & HOD",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:44.363804+00:00",
+    "updated_at": "2026-09-30T09:09:44.363804+00:00"
+  },
+  {
+    "id": "6364f3a9-dac5-403e-995c-d91e5a200b75",
+    "faculty_id": "26TS510069",
+    "name": "MULLU SAISRUTHI",
+    "designation": "ASST. PROF. (PHYSICS)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:45.907811+00:00",
+    "updated_at": "2026-09-30T09:09:45.907811+00:00"
+  },
+  {
+    "id": "36db3a42-e7f7-4947-844d-b9eead8e1798",
+    "faculty_id": "25TS040053",
+    "name": "POTUNURU SATEESH KUMAR",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-27T11:21:56.597903+00:00",
+    "updated_at": "2026-09-30T09:09:29.874+00:00"
+  },
+  {
+    "id": "6ed661be-f1dc-4cb0-a1fa-a8bd3bf6c051",
+    "faculty_id": "24TS040031",
+    "name": "DASARI SOMASEKHAR",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:31.271731+00:00",
+    "updated_at": "2026-09-30T09:09:31.271731+00:00"
+  },
+  {
+    "id": "be3845e9-3833-440a-a7de-22e023f77f2f",
+    "faculty_id": "24TS040028",
+    "name": "TAMMINA HEMA SUNDARI",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:31.674377+00:00",
+    "updated_at": "2026-09-30T09:09:31.674377+00:00"
+  },
+  {
+    "id": "0fd1c8eb-d4cc-465c-93fa-3209c1799a70",
+    "faculty_id": "24TS040040",
+    "name": "KOSTI KALA PRIYA",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:31.877648+00:00",
+    "updated_at": "2026-09-30T09:09:31.877648+00:00"
+  },
+  {
+    "id": "8f090732-cbce-4757-88fe-cca31998139d",
+    "faculty_id": "24TS040045",
+    "name": "KADIYALA JHANSI RANI",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:32.06689+00:00",
+    "updated_at": "2026-09-30T09:09:32.06689+00:00"
+  },
+  {
+    "id": "a2488b44-0914-40cf-8d03-0b2e787e546e",
+    "faculty_id": "25TS040051",
+    "name": "VALLY SATYAVATHI",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:32.255443+00:00",
+    "updated_at": "2026-09-30T09:09:32.255443+00:00"
+  },
+  {
+    "id": "b005c671-fbef-43c1-9828-6f36866fd011",
+    "faculty_id": "23TS510015",
+    "name": "M KRISHNA RAJU MUDUNURU",
+    "designation": "ASST. PROF. (MATHEMATICS)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:44.568841+00:00",
+    "updated_at": "2026-09-30T09:09:44.568841+00:00"
+  },
+  {
+    "id": "000ea4e6-61d1-4a03-8d95-d268616c8ac3",
+    "faculty_id": "25TS040052",
+    "name": "GORLI SIVA KUMARI",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:32.451212+00:00",
+    "updated_at": "2026-09-30T09:09:32.451212+00:00"
+  },
+  {
+    "id": "07c6b405-bc23-4592-95fa-9407fec3ea11",
+    "faculty_id": "25TS040065",
+    "name": "PENTAPALLI KASTURI",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:32.631577+00:00",
+    "updated_at": "2026-09-30T09:09:32.631577+00:00"
+  },
+  {
+    "id": "73efa02c-795e-419a-ab5f-e1e7ceae4ac8",
+    "faculty_id": "26TS040078",
+    "name": "NAGESWARI",
+    "designation": "ASST. PROF.",
+    "department": "PENDING",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:29.371569+00:00",
+    "updated_at": "2026-09-30T09:09:32.309+00:00"
+  },
+  {
+    "id": "cc2c42bd-ba0d-48cd-987b-9b42cdb61f8c",
+    "faculty_id": "26TS040079",
+    "name": "URITY PRADEEP KUMAR",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-27T17:32:36.614419+00:00",
+    "updated_at": "2026-09-30T09:09:32.491+00:00"
+  },
+  {
+    "id": "5febd470-a1ef-4a2e-ab53-502364df3626",
+    "faculty_id": "26TS040082",
+    "name": "RAYALA MAHESH",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:28.067111+00:00",
+    "updated_at": "2026-09-30T09:09:32.685+00:00"
+  },
+  {
+    "id": "f43ed172-4eef-4909-b6f7-3c8065e8ef58",
+    "faculty_id": "26TS040089",
+    "name": "VURUKUTI SINDHU BHARGAVI",
+    "designation": "ASST. PROF.",
+    "department": "ECE",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:30.372195+00:00",
+    "updated_at": "2026-09-30T09:09:32.862+00:00"
+  },
+  {
+    "id": "b360d538-df30-4969-957a-fca954447243",
+    "faculty_id": "24TS020027",
+    "name": "AKULA PRASADA RAO",
+    "designation": "ASSOC. PROF. & HOD",
+    "department": "EEE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:34.34268+00:00",
+    "updated_at": "2026-09-30T09:09:34.34268+00:00"
+  },
+  {
+    "id": "95749cb7-4e30-4926-9791-1e4dbef00bc6",
+    "faculty_id": "23TS020019",
+    "name": "REDDI SUJANA SRI",
+    "designation": "ASST. PROF.",
+    "department": "EEE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:35.160078+00:00",
+    "updated_at": "2026-09-30T09:09:35.160078+00:00"
+  },
+  {
+    "id": "3b4b0cfe-900d-4f15-8aaf-25c8ed6ec8af",
+    "faculty_id": "24TS020033",
+    "name": "PATTI LAKSHMI CHANDINI",
+    "designation": "ASST. PROF.",
+    "department": "EEE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:36.180647+00:00",
+    "updated_at": "2026-09-30T09:09:36.180647+00:00"
+  },
+  {
+    "id": "3f8a2439-e958-4d77-8bb5-e17f03a63ce2",
+    "faculty_id": "24TS020044",
+    "name": "SHIRISHA UNDRAJAVARAPU",
+    "designation": "ASST. PROF.",
+    "department": "EEE",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:37.309671+00:00",
+    "updated_at": "2026-09-30T09:09:37.309671+00:00"
+  },
+  {
+    "id": "c9645956-9e4e-4255-873f-c2912f8b7c87",
+    "faculty_id": "26TS020080",
+    "name": "RONGALI ANURADHA",
+    "designation": "ASST. PROF.",
+    "department": "EEE",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:28.5549+00:00",
+    "updated_at": "2026-09-30T09:09:36.996+00:00"
+  },
+  {
+    "id": "72c8e3e2-99bf-49b1-894e-dcc8567ffaaf",
+    "faculty_id": "23TS030023",
+    "name": "BEELA RAMANJANEYULU",
+    "designation": "ASSOC. PROF.",
+    "department": "MECH",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:38.318266+00:00",
+    "updated_at": "2026-09-30T09:09:38.318266+00:00"
+  },
+  {
+    "id": "2279c40e-8839-41bc-abe4-c988a651ea76",
+    "faculty_id": "24TS030041",
+    "name": "DR TANKALA RAVITEJA",
+    "designation": "ASST. PROF.",
+    "department": "MECH",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:38.548927+00:00",
+    "updated_at": "2026-09-30T09:09:38.548927+00:00"
+  },
+  {
+    "id": "6f4182e1-9f87-414c-95dc-06ae7e1809d2",
+    "faculty_id": "23TS030018",
+    "name": "SURESH BABU TALLAPUDI",
+    "designation": "ASST. PROF.",
+    "department": "MECH",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:38.778598+00:00",
+    "updated_at": "2026-09-30T09:09:38.778598+00:00"
+  },
+  {
+    "id": "13db59dd-bdec-42a5-9910-b6c92b944bc8",
+    "faculty_id": "26TS030066",
+    "name": "PADMAJA ANDAVARAPU",
+    "designation": "ASST. PROF.",
+    "department": "MECH",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:39.059099+00:00",
+    "updated_at": "2026-09-30T09:09:39.059099+00:00"
+  },
+  {
+    "id": "88d9d3a2-0286-4fce-9587-1b3404b34e07",
+    "faculty_id": "26TS030072",
+    "name": "KALDARI SRIDEVI",
+    "designation": "ASST. PROF.",
+    "department": "MECH",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:39.248788+00:00",
+    "updated_at": "2026-09-30T09:09:39.248788+00:00"
+  },
+  {
+    "id": "cd82afd1-6d06-4d5a-9013-aff61f8b3831",
+    "faculty_id": "24TS510036",
+    "name": "DANTHUMSETTY NEELIMA",
+    "designation": "ASST. PROF. (MATHEMATICS)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:44.753907+00:00",
+    "updated_at": "2026-09-30T09:09:44.753907+00:00"
+  },
+  {
+    "id": "807ba7b4-3f9e-4fde-a0cd-b9acfea0cdda",
+    "faculty_id": "25TS510046",
+    "name": "KORADA DHANALAKSHMI",
+    "designation": "ASST. PROF. (PHYSICS)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:44.967239+00:00",
+    "updated_at": "2026-09-30T09:09:44.967239+00:00"
+  },
+  {
+    "id": "4be70288-6f66-4ef9-898f-d988b6137782",
+    "faculty_id": "23TS510003",
+    "name": "REGULAVALASA HARI PRASAD",
+    "designation": "ASST. PROF. (MATHEMATICS)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:45.148855+00:00",
+    "updated_at": "2026-09-30T09:09:45.148855+00:00"
+  },
+  {
+    "id": "27742d39-99be-474f-9e49-343836e041b7",
+    "faculty_id": "26TS510090",
+    "name": "PHANINDRA VARMA",
+    "designation": "ASST. PROF.",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T08:01:24.929029+00:00",
+    "updated_at": "2026-09-30T09:09:44.823+00:00"
+  },
+  {
+    "id": "a5511e6e-6e62-4c51-bc29-fcbe019e00f1",
+    "faculty_id": "25TS510057",
+    "name": "SRAVAN KUMAR YALLA",
+    "designation": "ASST. PROF. (ENGLISH)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:46.087121+00:00",
+    "updated_at": "2026-09-30T09:09:46.087121+00:00"
+  },
+  {
+    "id": "18e89575-8da4-429e-ba04-9401f48d9f5a",
+    "faculty_id": "26TS510083",
+    "name": "DR KRISHNA CHATUR SOWMONDAL",
+    "designation": "ASST. PROF.",
+    "department": "PENDING",
+    "user_id": null,
+    "created_at": "2026-09-30T06:10:29.097256+00:00",
+    "updated_at": "2026-09-30T09:09:45.762+00:00"
+  },
+  {
+    "id": "7a746d91-30f6-4955-bf76-672bb7ea08df",
+    "faculty_id": "23TS510004",
+    "name": "GUNTU APPA RAO",
+    "designation": "ASST. PROF. & PD",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:46.484395+00:00",
+    "updated_at": "2026-09-30T09:09:46.484395+00:00"
+  },
+  {
+    "id": "2fa54f10-4f3c-4439-8bf6-235c6a4f46bf",
+    "faculty_id": "23TS510010",
+    "name": "SARIKA GOVIND",
+    "designation": "ASST. PROF. (CHEMISTRY)",
+    "department": "BS&H",
+    "user_id": null,
+    "created_at": "2026-09-30T09:09:46.67895+00:00",
+    "updated_at": "2026-09-30T09:09:46.67895+00:00"
+  }
+]

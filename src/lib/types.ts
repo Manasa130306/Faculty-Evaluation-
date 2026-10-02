@@ -45,7 +45,7 @@ export interface MonthLock {
   locked_by?: string | null;
 }
 
-export type EvaluationStatus = 'draft' | 'pending' | 'complete';
+export type EvaluationStatus = 'draft' | 'pending' | 'complete' | 'Submitted' | 'Complete' | 'Pending';
 
 export interface EvaluationHeadMark {
   id?: string;

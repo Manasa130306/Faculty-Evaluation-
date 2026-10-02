@@ -34,11 +34,8 @@ function getFacultyAuthEmail(facultyId: string): string {
 }
 
 function getAdminAuthEmail(adminId: string): string {
-  if (adminId.includes('@')) {
-    return adminId.trim().toLowerCase();
-  }
   const clean = adminId.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-  return `admin_${clean}@nsriet.edu.in`;
+  return `admin_${clean}@nsriet.internal`;
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -320,25 +317,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('[ADMIN AUTH] Login started');
     const cleanId = adminId.trim().toUpperCase();
     console.log('[ADMIN AUTH] Credentials received for ID:', cleanId);
-    const email = getAdminAuthEmail(cleanId);
+    const email = `admin_${cleanId.toLowerCase()}@nsriet.internal`;
 
     // Verify authorized Admin identities & passwords
     const isValidAdmin = cleanId === 'NSRE01' && password === 'NSRE@ADMIN';
 
     if (!isValidAdmin) {
       console.warn('[ADMIN AUTH ERROR] Invalid Admin ID or password');
-      return { success: false, error: 'Invalid Admin ID or password.' };
+      return { success: false, error: 'Invalid Administrator ID or password.' };
     }
 
     const adminUser: Profile = {
       id: `admin_${cleanId.toLowerCase()}`,
       faculty_id: cleanId,
-      name:
-        cleanId === 'NSRE01'
-          ? 'Principal / Chief Evaluator'
-          : 'System Administrator (IQAC)',
+      name: 'Principal / Chief Evaluator',
       department: 'Administration',
-      designation: cleanId === 'NSRE01' ? 'Chief Administrator' : 'Evaluation Administrator',
+      designation: 'Chief Administrator',
       role: 'admin',
       email,
       created_at: new Date().toISOString(),

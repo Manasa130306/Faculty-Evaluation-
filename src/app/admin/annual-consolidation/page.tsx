@@ -8,7 +8,8 @@ import {
   exportSelectedMonthToExcel,
   exportCompleteReportToExcel,
 } from '@/lib/excel/export';
-import { CURRENT_DEFAULT_YEAR, DEPARTMENTS, CALENDAR_MONTHS } from '@/lib/constants/heads';
+import { CURRENT_DEFAULT_YEAR, CURRENT_DEFAULT_MONTH, DEPARTMENTS, CALENDAR_MONTHS } from '@/lib/constants/heads';
+import { updateMonthlyExcelAction } from '@/app/actions/drive';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,7 +74,7 @@ export default function AdminAnnualConsolidationPage() {
   // Download Dialog & Options State
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState<boolean>(false);
   const [downloadOption, setDownloadOption] = useState<DownloadOption>('complete_report');
-  const [targetMonth, setTargetMonth] = useState<string>('September');
+  const [targetMonth, setTargetMonth] = useState<string>(CURRENT_DEFAULT_MONTH);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -130,18 +131,38 @@ export default function AdminAnnualConsolidationPage() {
       const allFaculty = await DataService.getAllFaculty();
       const evals = await DataService.getAllEvaluationsMap(selectedYear);
 
+      let driveStatusMessage = '';
+
       if (downloadOption === 'annual_only') {
         await exportAnnualConsolidationOnlyToExcel(allFaculty, selectedYear, evals);
       } else if (downloadOption === 'selected_month') {
         await exportSelectedMonthToExcel(allFaculty, selectedYear, targetMonth, evals);
+        
+        // Save same Excel file to Google Drive
+        const driveResult = await updateMonthlyExcelAction(
+          allFaculty.map((f: any) => ({
+            faculty_id: f.faculty_id,
+            name: f.name,
+            department: f.department,
+          })),
+          selectedYear,
+          targetMonth,
+          evals
+        );
+        
+        if (driveResult.success) {
+          driveStatusMessage = `✓ Excel Downloaded & Archived\n${targetMonth} ${selectedYear} report downloaded and archived to Google Drive.`;
+        } else {
+          driveStatusMessage = 'Excel downloaded successfully, but Google Drive archive failed.';
+        }
       } else {
         // Complete Report (13 sheets)
         await exportCompleteReportToExcel(allFaculty, selectedYear, evals);
       }
 
       setToastMessage({
-        type: 'success',
-        text: 'Excel report downloaded successfully.',
+        type: driveStatusMessage.includes('failed') ? 'error' : 'success',
+        text: driveStatusMessage || 'Excel report downloaded successfully.',
       });
       setIsDownloadModalOpen(false);
     } catch (err) {

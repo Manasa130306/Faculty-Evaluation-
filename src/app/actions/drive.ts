@@ -10,6 +10,7 @@ import {
   archiveReferenceInDrive,
   removeWebsiteReferenceAccess,
 } from '@/lib/google/drive';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'];
 
@@ -63,6 +64,7 @@ export async function uploadReferenceFileAction(
       fileSize: file.size,
       fileType: file.type || 'application/octet-stream',
       fileName: safeName,
+      folderId: headFolderId,
     };
   } catch (err: any) {
     console.error('Drive upload error:', err);
@@ -95,8 +97,41 @@ export async function cleanupReferenceFilesAction(
 
 export async function cleanupExpiredDocumentsAction(retentionDays: number = 60) {
   try {
-    const result = await removeWebsiteReferenceAccess();
-    return { success: true, deletedCount: 0 };
+    const sb = createAdminClient();
+    const now = new Date().toISOString();
+
+    // 1. Identify records where website preview expired
+    const { data: expiredRecords, error: fetchErr } = await sb
+      .from('evaluation_heads')
+      .select('id')
+      .lt('website_visible_until', now)
+      .not('reference_document_path', 'is', null);
+
+    if (fetchErr) {
+      throw new Error(`Failed to fetch expired records: ${fetchErr.message}`);
+    }
+
+    if (!expiredRecords || expiredRecords.length === 0) {
+      return { success: true, deletedCount: 0 };
+    }
+
+    // 2. Clear application-side metadata but KEEP drive_file_id / drive_folder_id
+    const ids = expiredRecords.map((r: any) => r.id);
+    const { error: updateErr } = await sb
+      .from('evaluation_heads')
+      .update({
+        reference_document_path: null,
+        reference_document_name: null,
+        reference_document_size: null,
+        reference_document_type: null,
+      })
+      .in('id', ids);
+
+    if (updateErr) {
+      throw new Error(`Failed to update expired records: ${updateErr.message}`);
+    }
+
+    return { success: true, deletedCount: ids.length };
   } catch (err: any) {
     console.error('Drive retention cleanup action error:', err);
     return { success: false, error: err.message || 'Retention cleanup error' };
@@ -115,7 +150,7 @@ export async function updateMonthlyExcelAction(
     }
 
     const { monthFolderId } = await getMonthFolder(year, monthName);
-    const fileName = `${monthName}_Final_Report.xlsx`;
+    const fileName = `Faculty_SAR_Tracker_${monthName}_${year}.xlsx`;
 
     const { getExcelReportFromDrive, updateExcelReportInDrive } = await import('@/lib/google/drive');
     const existingBuffer = await getExcelReportFromDrive(fileName, monthFolderId);

@@ -44,6 +44,7 @@ export default function FacultyManagementPage() {
   const [selectedFacultyForIdUpdate, setSelectedFacultyForIdUpdate] = useState<FacultyRecord | null>(null);
   const [isIdUpdateModalOpen, setIsIdUpdateModalOpen] = useState<boolean>(false);
   const [newFacultyIdInput, setNewFacultyIdInput] = useState<string>('');
+  const [newDojInput, setNewDojInput] = useState<string>('');
   const [idUpdateError, setIdUpdateError] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -63,8 +64,10 @@ export default function FacultyManagementPage() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user) {
+      loadData();
+    }
+  }, [user]);
 
   const handleOpenRemovalModal = (faculty: FacultyRecord) => {
     setSelectedFacultyForRemoval(faculty);
@@ -74,6 +77,7 @@ export default function FacultyManagementPage() {
   const handleOpenIdUpdateModal = (faculty: FacultyRecord) => {
     setSelectedFacultyForIdUpdate(faculty);
     setNewFacultyIdInput(faculty.faculty_id.startsWith('PENDING') ? '' : faculty.faculty_id);
+    setNewDojInput(faculty.doj || '');
     setIdUpdateError(null);
     setIsIdUpdateModalOpen(true);
   };
@@ -103,7 +107,8 @@ export default function FacultyManagementPage() {
     try {
       const success = await DataService.updateFacultyId(
         selectedFacultyForIdUpdate.faculty_id,
-        cleanNewId
+        cleanNewId,
+        newDojInput.trim()
       );
       if (success) {
         setIsIdUpdateModalOpen(false);
@@ -189,7 +194,7 @@ export default function FacultyManagementPage() {
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Faculty Management</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Official NSRIET Faculty Master sourced from the Service Register ({activeCount} Active, {inactiveCount} Removed/Inactive)
+            Current faculty records maintained in the application database. Service Register is used only for reference and verification. ({activeCount} Active, {inactiveCount} Removed/Inactive)
           </p>
         </div>
 
@@ -274,7 +279,7 @@ export default function FacultyManagementPage() {
             <CardHeader className="bg-slate-50/70 border-b border-slate-200 py-3 px-5 flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-sm font-bold text-slate-800">
-                  Service Register Master Faculty Records
+                  Current Faculty Records
                 </CardTitle>
                 <CardDescription className="text-xs">
                   Showing {filteredFaculty.length} of {facultyList.length} total staff records
@@ -282,7 +287,7 @@ export default function FacultyManagementPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs bg-white font-mono">
-                  Source: SERVICE REGISTER
+                  Source: DATABASE
                 </Badge>
               </div>
             </CardHeader>
@@ -609,6 +614,19 @@ export default function FacultyManagementPage() {
             <p className="text-[11px] text-slate-500">
               Updating the Faculty ID will update master records and preserve all evaluation history without duplicate entries.
             </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 block">
+              Date of Joining (DOJ):
+            </label>
+            <Input
+              value={newDojInput}
+              onChange={(e) => setNewDojInput(e.target.value)}
+              placeholder="e.g. 10/05/2018 or 2018-05-10"
+              className="h-10 text-xs font-mono font-bold uppercase"
+              disabled={isProcessing}
+            />
           </div>
 
           {idUpdateError && (

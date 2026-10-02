@@ -51,5 +51,7 @@ export const DESIGNATIONS = [
   'ASSOC. PROF. & HOD',
 ];
 
-export const CURRENT_DEFAULT_YEAR = 2026;
-export const CURRENT_DEFAULT_MONTH = 'September';
+import { getCurrentAcademicMonth, getCurrentYear } from '../utils/date-utils';
+
+export const CURRENT_DEFAULT_YEAR = getCurrentYear();
+export const CURRENT_DEFAULT_MONTH = getCurrentAcademicMonth();

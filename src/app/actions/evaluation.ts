@@ -2,7 +2,6 @@
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
-import { SERVICE_REGISTER_FACULTY } from '@/lib/constants/facultyData';
 import { HISTORICAL_EVALUATIONS } from '@/lib/constants/historicalData';
 import { EvaluationMarkChange, MonthlyEvaluation, EvaluationHeadMark } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -21,12 +20,7 @@ export async function ensureFacultySeededAction() {
   }
 
   try {
-    const recordsToInsert = SERVICE_REGISTER_FACULTY.map((f) => ({
-      faculty_id: f.faculty_id.toUpperCase(),
-      name: f.name,
-      designation: f.designation,
-      department: f.department,
-    }));
+    const recordsToInsert: any[] = [];
 
     await sb.from('faculty').upsert(recordsToInsert, { onConflict: 'faculty_id' });
     return { success: true };
@@ -51,6 +45,10 @@ export async function saveHeadMarkAction(
     file_size?: number;
     file_type?: string;
     file_url?: string;
+    drive_file_id?: string;
+    drive_folder_id?: string;
+    uploaded_at?: string;
+    website_visible_until?: string | null;
   },
   referenceInfo: string = '',
   isAdminUpdate: boolean = false
@@ -64,9 +62,9 @@ export async function saveHeadMarkAction(
   }
 
   try {
-    // 1. Ensure faculty record exists
-    const facultyInfo = SERVICE_REGISTER_FACULTY.find((f) => f.faculty_id.toUpperCase() === cleanId);
-    await sb.from('faculty').upsert(
+    // 1. Ensure faculty record exists (run asynchronously, don't block unless needed)
+    const facultyInfo = ([] as any[]).find((f: any) => f.faculty_id.toUpperCase() === cleanId);
+    const facultyUpsertPromise = sb.from('faculty').upsert(
       {
         faculty_id: cleanId,
         name: facultyInfo?.name || cleanId,
@@ -122,6 +120,8 @@ export async function saveHeadMarkAction(
       }
     }
 
+    await facultyUpsertPromise; // Just await before continuing to ensure safety
+
     if (!evaluationId) {
       throw new Error('Failed to resolve evaluation record in Supabase');
     }
@@ -138,6 +138,10 @@ export async function saveHeadMarkAction(
     if (documentMetadata?.file_name) headPayload.reference_document_name = documentMetadata.file_name;
     if (documentMetadata?.file_size) headPayload.reference_document_size = documentMetadata.file_size;
     if (documentMetadata?.file_type) headPayload.reference_document_type = documentMetadata.file_type;
+    if (documentMetadata?.drive_file_id) headPayload.drive_file_id = documentMetadata.drive_file_id;
+    if (documentMetadata?.drive_folder_id) headPayload.drive_folder_id = documentMetadata.drive_folder_id;
+    if (documentMetadata?.uploaded_at) headPayload.uploaded_at = documentMetadata.uploaded_at;
+    if (documentMetadata?.website_visible_until !== undefined) headPayload.website_visible_until = documentMetadata.website_visible_until;
     if (referenceInfo) headPayload.reference_info = referenceInfo;
 
     await sb.from('evaluation_heads').upsert(headPayload, {
@@ -163,9 +167,8 @@ export async function saveHeadMarkAction(
       })
       .eq('id', evaluationId);
 
-    revalidatePath('/faculty');
-    revalidatePath('/admin/month-records');
-    revalidatePath('/admin/dashboard');
+    // Removed aggressive revalidatePath calls for drafts to avoid full page refresh and latency
+    // UI will update its local state optimistically instead.
 
     return {
       success: true,
@@ -194,7 +197,7 @@ export async function submitEvaluationAction(facultyId: string, year: number, mo
     const now = new Date().toISOString();
 
     // 1. Ensure faculty record exists
-    const facultyInfo = SERVICE_REGISTER_FACULTY.find((f) => f.faculty_id.toUpperCase() === cleanId);
+    const facultyInfo = ([] as any[]).find((f: any) => f.faculty_id.toUpperCase() === cleanId);
     await sb.from('faculty').upsert(
       {
         faculty_id: cleanId,
@@ -218,7 +221,7 @@ export async function submitEvaluationAction(facultyId: string, year: number, mo
       await sb
         .from('evaluations')
         .update({
-          status: 'Pending',
+          status: 'Submitted',
           submitted_at: now,
           updated_at: now,
         })
@@ -229,7 +232,7 @@ export async function submitEvaluationAction(facultyId: string, year: number, mo
           faculty_id: cleanId,
           year,
           month,
-          status: 'Pending',
+          status: 'Submitted',
           submitted_at: now,
           total_marks: 0,
           updated_at: now,
@@ -287,7 +290,7 @@ export async function adminModifyHeadMarkAction(params: {
 
     if (!evaluationId) {
       // Ensure faculty exists
-      const fInfo = SERVICE_REGISTER_FACULTY.find((f) => f.faculty_id.toUpperCase() === cleanId);
+      const fInfo = ([] as any[]).find((f: any) => f.faculty_id.toUpperCase() === cleanId);
       await sb.from('faculty').upsert(
         {
           faculty_id: cleanId,
@@ -470,7 +473,7 @@ export async function adminFinalizeEvaluationAction(facultyId: string, year: num
     const { error: updateError } = await sb
       .from('evaluations')
       .update({
-        status: 'Complete',
+        status: 'Submitted',
         updated_at: now,
       })
       .eq('id', evalData.id);

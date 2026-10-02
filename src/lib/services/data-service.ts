@@ -9,7 +9,7 @@ import {
   SarAuditRecord,
   EvaluationMarkChange,
 } from '../types';
-import { SERVICE_REGISTER_FACULTY, SAR_AUDIT_LOGS } from '../constants/facultyData';
+
 import { HISTORICAL_EVALUATIONS } from '../constants/historicalData';
 
 const STORAGE_KEYS = {
@@ -50,29 +50,21 @@ function initDefaultStorage(): void {
 
   // Initialize Faculty Master (56 authoritative faculty)
   if (!localStorage.getItem(STORAGE_KEYS.FACULTY_MASTER)) {
-    localStorage.setItem(STORAGE_KEYS.FACULTY_MASTER, JSON.stringify(SERVICE_REGISTER_FACULTY));
+    localStorage.setItem(STORAGE_KEYS.FACULTY_MASTER, JSON.stringify([]));
   }
 
   // Initialize Profiles (Admin + 56 faculty)
   if (!localStorage.getItem(STORAGE_KEYS.PROFILES)) {
     const defaultProfiles: Profile[] = [
       {
-        id: 'admin-01',
-        faculty_id: 'ADMIN01',
-        name: 'Administrator (IQAC)',
+        id: 'admin_nsre01',
+        faculty_id: 'NSRE01',
+        name: 'Principal / Chief Evaluator',
         department: 'Administration',
-        designation: 'Principal / Dean',
+        designation: 'Chief Administrator',
         role: 'admin',
-        email: 'admin@nsriet.edu.in',
+        email: 'admin_nsre01@nsriet.internal',
       },
-      ...SERVICE_REGISTER_FACULTY.map((f) => ({
-        id: `prof_${f.faculty_id}`,
-        faculty_id: f.faculty_id,
-        name: f.name,
-        department: f.department,
-        designation: f.designation,
-        role: 'faculty' as const,
-      })),
     ];
     localStorage.setItem(STORAGE_KEYS.PROFILES, JSON.stringify(defaultProfiles));
   }
@@ -126,13 +118,11 @@ function initDefaultStorage(): void {
 
   // Initialize SAR Audit
   if (!localStorage.getItem(STORAGE_KEYS.SAR_AUDIT)) {
-    localStorage.setItem(STORAGE_KEYS.SAR_AUDIT, JSON.stringify(SAR_AUDIT_LOGS));
+    localStorage.setItem(STORAGE_KEYS.SAR_AUDIT, JSON.stringify([]));
   }
 }
 
-const PRODUCTION_FACULTY_ID_SET = new Set(
-  SERVICE_REGISTER_FACULTY.map((f) => f.faculty_id.toUpperCase())
-);
+const PRODUCTION_FACULTY_ID_SET = new Set<string>();
 
 let cachedFaculty: FacultyRecord[] | null = null;
 let cachedFacultyTime = 0;
@@ -167,7 +157,7 @@ export const DataService = {
     }
 
     if (facultyList.length === 0) {
-      facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
+      facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, []);
     }
     
     cachedFaculty = facultyList;
@@ -187,7 +177,7 @@ export const DataService = {
         if (!error && data && data.length > 0) {
           return data.map((f: any) => ({
             id: f.id,
-            faculty_id: f.faculty_id,
+            faculty_id: f?.faculty_id,
             name: f.name,
             designation: f.designation,
             department: f.department,
@@ -206,15 +196,15 @@ export const DataService = {
     initDefaultStorage();
     const cleanId = facultyId.trim().toUpperCase();
 
-    if (cleanId === 'ADMIN' || cleanId === 'ADMIN01' || cleanId === 'ADMIN101' || cleanId === 'NSRE01') {
+    if (cleanId === 'NSRE01') {
       return {
-        id: `admin-${cleanId.toLowerCase()}`,
+        id: `admin_nsre01`,
         faculty_id: cleanId,
-        name: cleanId === 'NSRE01' ? 'Principal / Chief Evaluator' : cleanId === 'ADMIN101' ? 'Administrator (Demo)' : 'Administrator (IQAC)',
+        name: 'Principal / Chief Evaluator',
         department: 'Administration',
-        designation: cleanId === 'NSRE01' ? 'Chief Administrator' : 'Evaluation Administrator',
+        designation: 'Chief Administrator',
         role: 'admin',
-        email: `${cleanId.toLowerCase()}@nsriet.edu.in`,
+        email: 'admin_nsre01@nsriet.internal',
       };
     }
 
@@ -248,7 +238,7 @@ export const DataService = {
 
     // Check directly in faculty master
     const facultyList = await this.getAllFaculty();
-    const masterFound = facultyList.find((f) => f.faculty_id.toUpperCase() === cleanId);
+    const masterFound = facultyList.find((f) => f?.faculty_id.toUpperCase() === cleanId);
     if (masterFound) {
       return {
         id: `prof_${masterFound.faculty_id}`,
@@ -336,9 +326,9 @@ export const DataService = {
     }
 
     // Update LocalStorage Master
-    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
+    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, []);
     const updatedMaster = facultyMaster.map((f) => {
-      if (f.faculty_id.toUpperCase() === cleanId) {
+      if (f?.faculty_id.toUpperCase() === cleanId) {
         return {
           ...f,
           is_active: false,
@@ -389,9 +379,9 @@ export const DataService = {
     }
 
     // Update LocalStorage Master
-    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
+    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, []);
     const updatedMaster = facultyMaster.map((f) => {
-      if (f.faculty_id.toUpperCase() === cleanId) {
+      if (f?.faculty_id.toUpperCase() === cleanId) {
         return {
           ...f,
           is_active: true,
@@ -408,7 +398,7 @@ export const DataService = {
     return true;
   },
 
-  async updateFacultyId(oldFacultyId: string, newFacultyId: string): Promise<boolean> {
+  async updateFacultyId(oldFacultyId: string, newFacultyId: string, doj?: string): Promise<boolean> {
     initDefaultStorage();
     const cleanOld = oldFacultyId.trim().toUpperCase();
     const cleanNew = newFacultyId.trim().toUpperCase();
@@ -416,9 +406,14 @@ export const DataService = {
 
     if (isSupabaseConfigured()) {
       try {
+        const updatePayload: any = { faculty_id: cleanNew, updated_at: new Date().toISOString() };
+        if (doj !== undefined) {
+          updatePayload.doj = doj;
+        }
+
         await supabase
           .from('faculty')
-          .update({ faculty_id: cleanNew, updated_at: new Date().toISOString() })
+          .update(updatePayload)
           .eq('faculty_id', cleanOld);
 
         await supabase
@@ -436,14 +431,18 @@ export const DataService = {
     }
 
     // Update LocalStorage Master
-    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
+    const facultyMaster = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, []);
     const updatedMaster = facultyMaster.map((f) => {
-      if (f.faculty_id.toUpperCase() === cleanOld) {
-        return {
+      if (f?.faculty_id.toUpperCase() === cleanOld) {
+        const updatedRec = {
           ...f,
           faculty_id: cleanNew,
           updated_at: new Date().toISOString(),
         };
+        if (doj !== undefined) {
+          updatedRec.doj = doj;
+        }
+        return updatedRec;
       }
       return f;
     });
@@ -500,8 +499,8 @@ export const DataService = {
     setLocalData(STORAGE_KEYS.PROFILES, profiles);
 
     // Also update faculty master list
-    const facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
-    const fIdx = facultyList.findIndex((f) => f.faculty_id.toUpperCase() === cleanId);
+    const facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, []);
+    const fIdx = facultyList.findIndex((f) => f?.faculty_id.toUpperCase() === cleanId);
     if (fIdx >= 0) {
       facultyList[fIdx] = {
         ...facultyList[fIdx],
@@ -586,8 +585,8 @@ export const DataService = {
     setLocalData(STORAGE_KEYS.PROFILES, profiles);
 
     // Also update Faculty Master in local storage
-    const facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, SERVICE_REGISTER_FACULTY);
-    const fIdx = facultyList.findIndex((f) => f.faculty_id.toUpperCase() === cleanId);
+    const facultyList = getLocalData<FacultyRecord[]>(STORAGE_KEYS.FACULTY_MASTER, []);
+    const fIdx = facultyList.findIndex((f) => f?.faculty_id.toUpperCase() === cleanId);
     if (fIdx >= 0) {
       facultyList[fIdx] = {
         ...facultyList[fIdx],
@@ -683,21 +682,50 @@ export const DataService = {
         console.warn('Supabase get SAR audit logs error:', err);
       }
     }
-    return getLocalData<SarAuditRecord[]>(STORAGE_KEYS.SAR_AUDIT, SAR_AUDIT_LOGS);
+    return getLocalData<SarAuditRecord[]>(STORAGE_KEYS.SAR_AUDIT, []);
   },
 
   // 3. MONTH LOCKS
   async getMonthLocks(): Promise<MonthLock[]> {
     initDefaultStorage();
+    let locks: MonthLock[] = [];
     if (isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase.from('month_locks').select('*');
-        if (!error && data && data.length > 0) return data as MonthLock[];
+        if (!error && data && data.length > 0) locks = data as MonthLock[];
       } catch (err) {
         console.warn('Supabase fetch month locks error:', err);
       }
+    } else {
+      locks = getLocalData<MonthLock[]>(STORAGE_KEYS.LOCKS, []);
     }
-    return getLocalData<MonthLock[]>(STORAGE_KEYS.LOCKS, []);
+
+    // Auto-lock past months
+    const { getCurrentYear, getCurrentMonthIndex, MONTHS } = await import('../utils/date-utils');
+    const currentYear = getCurrentYear();
+    const currentMonthIdx = getCurrentMonthIndex();
+
+    let madeChanges = false;
+    for (const lock of locks) {
+      if (!lock.is_locked && !lock.locked_at) {
+        const targetMonthIdx = MONTHS.findIndex(m => m.toLowerCase() === lock.month.toLowerCase());
+        const isPast = lock.year < currentYear || (lock.year === currentYear && targetMonthIdx < currentMonthIdx);
+        if (isPast) {
+          lock.is_locked = true;
+          lock.locked_at = new Date().toISOString();
+          madeChanges = true;
+          if (isSupabaseConfigured()) {
+            supabase.from('month_locks').update({ is_locked: true, locked_at: lock.locked_at }).eq('year', lock.year).eq('month', lock.month).then();
+          }
+        }
+      }
+    }
+
+    if (madeChanges && !isSupabaseConfigured()) {
+      setLocalData(STORAGE_KEYS.LOCKS, locks);
+    }
+
+    return locks;
   },
 
   async isMonthLocked(year: number, month: string): Promise<boolean> {
@@ -719,7 +747,7 @@ export const DataService = {
               year: Number(year),
               month,
               is_locked: lockStatus,
-              locked_at: lockStatus ? new Date().toISOString() : null,
+              locked_at: new Date().toISOString(),
             },
             { onConflict: 'year,month' }
           )
@@ -740,7 +768,7 @@ export const DataService = {
       year: Number(year),
       month,
       is_locked: lockStatus,
-      locked_at: lockStatus ? new Date().toISOString() : null,
+      locked_at: new Date().toISOString(),
     };
 
     if (idx >= 0) {
@@ -1184,16 +1212,16 @@ export const DataService = {
       // Use getAllEvaluationsMap to avoid N+1 queries
       const allEvalsMap = await this.getAllEvaluationsMap(year);
       for (const f of activeFaculty) {
-        if (f.faculty_id) {
-          const key = this.getEvaluationKey(f.faculty_id, year, monthName);
-          evalsMap[key] = allEvalsMap[key] || await this.getEvaluation(f.faculty_id, year, monthName);
+        if (f?.faculty_id) {
+          const key = this.getEvaluationKey(f?.faculty_id, year, monthName);
+          evalsMap[key] = allEvalsMap[key] || await this.getEvaluation(f?.faculty_id, year, monthName);
         }
       }
     } catch (err) {
       // Fallback to one-by-one if the batch fetch fails
       for (const f of activeFaculty) {
-        if (f.faculty_id) {
-          evalsMap[this.getEvaluationKey(f.faculty_id, year, monthName)] = await this.getEvaluation(f.faculty_id, year, monthName);
+        if (f?.faculty_id) {
+          evalsMap[this.getEvaluationKey(f?.faculty_id, year, monthName)] = await this.getEvaluation(f?.faculty_id, year, monthName);
         }
       }
     }
@@ -1363,7 +1391,7 @@ export const DataService = {
     const rows: FacultySummaryRow[] = [];
 
     for (const f of allFaculty) {
-      const key = this.getEvaluationKey(f.faculty_id, year, month);
+      const key = this.getEvaluationKey(f?.faculty_id, year, month);
       const evalData = evals[key];
 
       // Check if faculty is active for this month OR has historical evaluation records for this month
@@ -1386,7 +1414,7 @@ export const DataService = {
       if (searchTerm && searchTerm.trim()) {
         const queryStr = searchTerm.toLowerCase().trim();
         const matchesName = f.name.toLowerCase().includes(queryStr);
-        const matchesId = f.faculty_id.toLowerCase().includes(queryStr);
+        const matchesId = f?.faculty_id.toLowerCase().includes(queryStr);
         const matchesDept = f.department.toLowerCase().includes(queryStr);
         if (!matchesName && !matchesId && !matchesDept) {
           continue;
@@ -1399,7 +1427,7 @@ export const DataService = {
       }
 
       const row: FacultySummaryRow = {
-        faculty_id: f.faculty_id,
+        faculty_id: f?.faculty_id,
         name: f.name,
         department: f.department,
         designation: f.designation,
